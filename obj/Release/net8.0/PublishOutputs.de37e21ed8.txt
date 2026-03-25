@@ -1,2 +1,0 @@
-C:\Users\1cace\Desktop\SCDEV\ADSUM\AdsumPater\AdsumPater\dist\firebase.json
-C:\Users\1cace\Desktop\SCDEV\ADSUM\AdsumPater\AdsumPater\dist\web.config
