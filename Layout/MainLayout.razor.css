@@ -1,0 +1,154 @@
+/* --- ESTRUCTURA BASE --- */
+.site {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.main {
+    flex: 1;
+}
+
+/* --- FOOTER ESTILO ADSUM --- */
+.footer2 {
+    margin-top: auto;
+    background: #281b13; /* El mismo Dark Coffee del Nav */
+    color: white;
+    border-top: 1px solid rgba(255,255,255,0.05);
+}
+
+.footer2-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 40px;
+    padding: 60px 20px;
+    flex-wrap: wrap;
+}
+
+/* Branding en Footer */
+.footer2-brand {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex: 1;
+    min-width: 250px;
+}
+
+.footer2-brand img {
+    width: 50px;
+    height: auto;
+}
+
+.footer2-title {
+    font-weight: 800;
+    font-size: 1.2rem;
+    color: #f7a343; /* Naranja Adsum */
+    line-height: 1.1;
+}
+
+.footer2-sub {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.7);
+    margin-top: 4px;
+}
+
+/* Columnas */
+.footer2-cols {
+    display: flex;
+    gap: 60px;
+    flex-wrap: wrap;
+    flex: 2;
+    justify-content: flex-end;
+}
+
+.footer2-col {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 120px;
+}
+
+.footer2-coltitle {
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 13px;
+    letter-spacing: 1px;
+    color: #f7a343;
+    margin-bottom: 8px;
+}
+
+.footer2-col a {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.footer2-col a:hover {
+    color: #f7a343;
+    padding-left: 5px; /* Animación sutil al hover */
+}
+
+/* Barra inferior */
+.footer2-bottom {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 20px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.footer2-bottom-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.5);
+    padding: 0 20px;
+}
+
+.footer2-note {
+    font-style: italic;
+    color: rgba(247, 163, 67, 0.6);
+}
+.dev-link {
+    color: #f7a343; /* El naranja de la marca */
+    text-decoration: none;
+    font-weight: 600;
+    transition: opacity 0.2s;
+}
+
+.dev-link:hover {
+    text-decoration: underline;
+    opacity: 0.8;
+    color: #f7a343; /* Mantiene el color al pasar el mouse */
+}
+
+/* Ajuste para que en móviles no se amontone el texto */
+@media (max-width: 576px) {
+    .footer2-bottom-inner {
+        flex-direction: column;
+        text-align: center;
+        gap: 5px;
+    }
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 768px) {
+    .footer2-inner {
+        flex-direction: column;
+        gap: 40px;
+        padding: 40px 20px;
+    }
+
+    .footer2-cols {
+        justify-content: flex-start;
+        gap: 30px;
+        width: 100%;
+    }
+
+    .footer2-bottom-inner {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+}

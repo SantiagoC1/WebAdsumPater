@@ -1,0 +1,23 @@
+<div class="pdf-container">
+    <iframe src="@PdfUrl"
+            class="pdf-frame"
+            loading="lazy">
+    </iframe>
+
+    <div class="pdf-actions">
+        <a href="@PdfUrl" target="_blank" class="btn-pdf">
+            Abrir PDF
+        </a>
+
+        <a href="@PdfUrl" download class="btn-pdf-outline">
+            Descargar
+        </a>
+    </div>
+</div>
+
+@code {
+
+    [Parameter]
+    public string ? PdfUrl { get; set; }
+
+}

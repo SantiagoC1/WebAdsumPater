@@ -1,0 +1,240 @@
+@page "/colaborar"
+@inject IJSRuntime JS
+
+<PageTitle>Colaborar - Adsum Pater</PageTitle>
+
+<section class="hero-section" id="inicio">
+    <div class="hero-overlay"></div>
+
+    <div class="container hero-container">
+        <span class="badge-hero">Impacto Directo</span>
+
+        <h1 class="hero-title">
+            Sostengamos juntos <br />
+            <span class="text-destacado">el envío</span>
+        </h1>
+
+        <p class="hero-subtitle">
+            Adsum Pater se mueve gracias a la generosidad de quienes comparten nuestro sueño.
+        </p>
+
+        <p class="hero-subtitle hero-subtitle-secondary">
+            Tu aporte nos permite llegar donde más nos necesitan.
+        </p>
+
+        <div class="hero-actions">
+            <button class="btn-custom btn-rojo" @onclick='() => ScrollTo("donar")'>
+                Donar Ahora <span class="material-icons">arrow_downward</span>
+            </button>
+
+            <button class="btn-custom btn-transparente" @onclick='() => ScrollTo("la-herencia")'>
+                Patrocinar Peña
+            </button>
+        </div>
+    </div>
+</section>
+
+<section class="section stats-section">
+    <div class="container">
+        <div class="stats-grid">
+            <div class="stat-item group">
+                <div class="icon-box icon-box-red">
+                    <span class="material-icons">groups</span>
+                </div>
+                <div class="stat-number">10+</div>
+                <p class="stat-label">Pueblos Beneficiados</p>
+            </div>
+
+            <div class="stat-item group">
+                <div class="icon-box icon-box-red">
+                    <span class="material-icons">volunteer_activism</span>
+                </div>
+                <div class="stat-number">100+</div>
+                <p class="stat-label">Jóvenes Misioneros</p>
+            </div>
+
+            <div class="stat-item group">
+                <div class="icon-box icon-box-red">
+                    <span class="material-icons">verified</span>
+                </div>
+                <div class="stat-number">100%</div>
+                <p class="stat-label">Transparencia</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section bg-light" id="donar">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Tu granito de arena</h2>
+            <p class="section-desc">
+                Tu contribución directa nos permite financiar el transporte, alojamiento y suministros.
+            </p>
+        </div>
+
+        <div class="donation-grid">
+            <div class="card card-centered">
+                <div class="icon-circle icon-circle-amber">
+                    <span class="material-symbols-outlined">qr_code_2</span>
+                </div>
+
+                <h3 class="card-title">Doná por QR</h3>
+
+                <div class="qr-frame">
+                    <div class="qr-placeholder">
+                        <span class="material-icons qr-icon">qr_code_2</span>
+                        <div class="qr-border qr-border-tl"></div>
+                        <div class="qr-border qr-border-tr"></div>
+                        <div class="qr-border qr-border-bl"></div>
+                        <div class="qr-border qr-border-br"></div>
+                    </div>
+                </div>
+
+                <p class="card-footer-text">Escaneá con cualquier app bancaria</p>
+            </div>
+
+            <div class="card card-flex">
+                <div class="icon-circle icon-circle-red">
+                    <span class="material-symbols-outlined">account_balance</span>
+                </div>
+
+                <h3 class="card-title">Transferencia Directa</h3>
+
+                <div class="transfer-details">
+                    <div class="data-box">
+                        <div class="data-header">
+                            <span class="data-label">Alias</span>
+                            <button class="btn-copy" @onclick="CopiarAlias">
+                                <span class="material-symbols-outlined">@(aliasCopiado ? "check" : "content_copy")</span>
+                                @(aliasCopiado ? "¡Copiado!" : "Copiar")
+                            </button>
+                        </div>
+                        <div class="data-value">@Alias</div>
+                    </div>
+
+                    <div class="data-box">
+                        <div class="data-header">
+                            <span class="data-label">CBU</span>
+                            <button class="btn-copy" @onclick="CopiarCBU">
+                                <span class="material-symbols-outlined">@(cbuCopiado ? "check" : "content_copy")</span>
+                                @(cbuCopiado ? "¡Copiado!" : "Copiar")
+                            </button>
+                        </div>
+                        <div class="data-value cbu-number">@CBU</div>
+                    </div>
+
+                    <div class="info-note">
+                        <span class="material-icons">info</span>
+                        Titular: Trinidad Maria Ippolito
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section section-primary" id="la-herencia">
+    <div class="container">
+        <div class="herencia-layout">
+            <div class="herencia-content">
+                <span class="overline">Evento Principal</span>
+
+                <h2 class="herencia-title">
+                    La Herencia
+                </h2>
+
+                <p class="herencia-text">
+                    Nuestra peña es el evento cultural más importante para recaudar fondos.
+                </p>
+
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <span class="material-icons metric-icon">festival</span>
+                        <div class="metric-number">400+</div>
+                        <div class="metric-label">Asistentes</div>
+                    </div>
+
+                    <div class="metric-card">
+                        <span class="material-icons metric-icon">campaign</span>
+                        <div class="metric-number">50k+</div>
+                        <div class="metric-label">Impresiones</div>
+                    </div>
+                </div>
+
+                <div class="herencia-buttons">
+                    <a href="@SponsorWhatsappUrl" target="_blank" class="btn btn-white">
+                        <span class="material-symbols-outlined">star</span>
+                        Ser Sponsor
+                    </a>
+
+                    <a href="@PremiosWhatsappUrl" target="_blank" class="btn btn-outline-white">
+                        <span class="material-symbols-outlined">card_giftcard</span>
+                        Donar Premios
+                    </a>
+                </div>
+            </div>
+
+            <div class="herencia-images">
+                <div class="photo-frame-container">
+                    <div class="photo-frame">
+                        <img src="img/lh124.jpg" alt="La Herencia" class="framed-img" />
+                    </div>
+
+                    <div class="quote-card">
+                        <p>"Unidos por la tradición que nos define."</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@code {
+    private bool aliasCopiado = false;
+    private bool cbuCopiado = false;
+
+    private const string Alias = "adsumpater";
+    private const string CBU = "3840200500000023551914";
+
+    private string SponsorWhatsappUrl =>
+        "https://wa.me/5492216722560?text=" + Uri.EscapeDataString(
+            "¡Hola! Quiero sumarme como sponsor de La Herencia de Adsum Pater. ¿Me pasan información sobre opciones de colaboración, difusión y costos?"
+        );
+
+    private string PremiosWhatsappUrl =>
+        "https://wa.me/5492214358592?text=" + Uri.EscapeDataString(
+            "¡Hola! Quiero donar premios para La Herencia de Adsum Pater. ¿Me cuentan cómo puedo colaborar y coordinar la entrega?"
+        );
+
+    private async Task CopiarAlias()
+    {
+        await JS.InvokeVoidAsync("navigator.clipboard.writeText", Alias);
+        aliasCopiado = true;
+        StateHasChanged();
+        await Task.Delay(2500);
+        aliasCopiado = false;
+        StateHasChanged();
+    }
+
+    private async Task CopiarCBU()
+    {
+        await JS.InvokeVoidAsync("navigator.clipboard.writeText", CBU);
+        cbuCopiado = true;
+        StateHasChanged();
+        await Task.Delay(2500);
+        cbuCopiado = false;
+        StateHasChanged();
+    }
+
+    private async Task ScrollTo(string id)
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("scrollToElement", id);
+        }
+        catch
+        {
+        }
+    }
+}

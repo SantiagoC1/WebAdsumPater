@@ -1,0 +1,219 @@
+:root{
+  --azul:#c2e2ff;
+  --amarillo:#f7a343;
+  --marron:#281b13;
+  --rojo:#b01b18;
+  --blanco:#faf6f5;
+
+  /* Cambia esto por tu color deseado */
+    --bs-link-color: #f7a343; 
+    
+    /* Opcional: Cambia el color cuando pasas el mouse */
+    --bs-link-hover-color: underline #f7a343;
+
+  --radius:18px;
+  --shadow: 0 12px 30px rgba(0,0,0,.08);
+}
+#blazor-error-ui {
+  display: none !important;
+}
+
+/* --- FORZAR ESTILOS GLOBALES DEL MENÚ --- */
+
+/* 1. Fondo y borde de la barra */
+.topbar {
+    background-color: #281b13 !important;
+    border-bottom: 1px solid rgba(255,255,255,0.1) !important;
+}
+
+
+/* 2. Links: Color claro y sin subrayado */
+.nav-link, .nav a {
+    color: #FAF6F5 !important; /* Blanco hueso */
+    text-decoration: none !important;
+    font-weight: 500;
+}
+
+/* 3. Hover: Naranja y subrayado */
+.nav-link:hover, .nav a:hover {
+    color: #f7a343 !important; /* Naranja */
+    text-decoration: underline !important;
+    text-underline-offset: 4px;
+}
+
+/* 4. Botón Sumate: Rojo */
+.cta, a.cta {
+    background-color: #b01b18 !important;
+    color: white !important;
+    padding: 6px 16px !important;
+    border-radius: 99px !important;
+    text-decoration: none !important;
+}
+
+.cta:hover, a.cta:hover {
+    background-color: #931415 !important;
+    text-decoration: none !important; /* El botón no se subraya */
+}
+
+/* 5. Logo Naranja */
+.brand, .brand:hover {
+    color: #f7a343 !important;
+    text-decoration: none !important;
+}
+
+/* Reset mínimo + base */
+*{ box-sizing: border-box; }
+
+html, body{
+  margin: 0;
+  padding: 0;
+  background: var(--blanco);
+  color: var(--marron);
+}
+
+a{ color: inherit; text-decoration: none; }
+a:hover{ text-decoration: none ; }
+
+img{
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+.container-xl{
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+/* Tipografía base (Bootstrap ya trae, pero esto ayuda) */
+h1,h2,h3{
+  margin: 0 0 10px;
+  letter-spacing: .2px;
+}
+
+/* Utilidades */
+.muted{ opacity: .75; }
+
+/* Botones globales reutilizables */
+.btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding: 10px 14px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 14px;
+  border: 1px solid rgba(40,27,19,.14);
+  background: white;
+  cursor: pointer;
+  transition: transform .12s ease, filter .12s ease, background .12s ease;
+}
+
+.btn:hover{ filter: brightness(.98); transform: translateY(-1px); }
+
+.btn.primary{
+  background: var(--amarillo);
+  border-color: rgba(40,27,19,.12);
+  color: var(--marron);
+}
+
+.btn.ghost{
+  background: transparent;
+}
+/* HERO con imagen de fondo + overlay oscuro + centrado */
+.page-hero{
+  padding: 80px 16px 40px;
+}
+
+
+.page-hero h1{
+  font-size: 42px;
+  margin-bottom: 12px;
+}
+
+.section{
+  padding: 64px 16px;
+}
+
+.section.alt{
+  background: #fff;
+}
+
+.section-grid{
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 32px;
+  align-items: center;
+}
+
+.section-img{
+  width: 100%;
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+}
+
+.cards{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.card{
+  background: var(--blanco);
+  border-radius: 18px;
+  padding: 20px;
+  box-shadow: var(--shadow);
+}
+
+.card strong{
+  display: block;
+  margin-bottom: 6px;
+}
+/* ✅ LOADER PRO (pegalo en tu app.css, idealmente al final) */
+#splash{
+  min-height: 100vh;
+  display: grid;
+  place-content: center;
+  gap: 14px;
+  text-align: center;
+  background: var(--blanco);
+  color: var(--marron);
+}
+
+#splash .spinner{
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 4px solid rgba(0,0,0,.15);
+  border-top-color: rgba(0,0,0,.55);
+  animation: spin .9s linear infinite;
+  margin: 0 auto;
+}
+/* Mostrar focus SOLO si es navegación con teclado */
+:focus { outline: none; }
+:focus-visible { outline: 2px solid var(--amarillo); outline-offset: 4px; }
+
+/* Si querés que NO aparezca ni siquiera el borde amarillo */
+:focus-visible { outline: none; }
+
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+#splash .splash-text{
+  opacity: .85;
+  font-size: 14px;
+  font-weight: 600;
+}
+@media (max-width: 900px){
+  .section-grid{
+    grid-template-columns: 1fr;
+  }
+  body.has-topbar{
+    padding-top: 10px; /* mobile suele ser un poco más alto */
+  }
+
+  .page-hero h1{
+    font-size: 34px;
+  }
+}

@@ -1,0 +1,1346 @@
+@page "/admin"
+@using AdsumPater.Services
+@using AdsumPater.Models
+@using Microsoft.AspNetCore.Components.Forms
+@inject FirebaseService Firebase
+@inject NavigationManager Nav
+@inject IJSRuntime JS
+
+<PageTitle>Comando - Adsum Pater</PageTitle>
+
+<div class="admin-layout">
+    @if (!isLogged)
+    {
+        <div class="login-screen">
+            <div class="login-box">
+                <div class="login-logo">🦅</div>
+                <h2>Centro de Comando</h2>
+                <p class="login-sub">Acceso exclusivo coordinadores</p>
+
+                <button class="btn-google" @onclick="LoginConGoogle">
+                    <svg width="20" height="20" viewBox="0 0 24 24">
+                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.84z" fill="#FBBC05" />
+                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+                    </svg>
+                    Iniciar con Google
+                </button>
+
+                @if (showError)
+                {
+                    <div class="error-msg">⛔ Acceso denegado para @emailIntentado</div>
+                }
+            </div>
+        </div>
+    }
+    else
+    {
+        <aside class="sidebar">
+            <div class="sidebar-head">
+                <div class="brand">Adsum Admin</div>
+                <small>Hola, @adminNombre</small>
+            </div>
+
+            <nav class="sidebar-nav">
+                <button class="@(tab == 1 ? "active" : "")" @onclick="() => ChangeTab(1)">💬 Foro (@pendientesCount/@publicadasCount)</button>
+                <button class="@(tab == 2 ? "active" : "")" @onclick="() => ChangeTab(2)">📝 Reflexiones</button>
+                <button class="@(tab == 3 ? "active" : "")" @onclick="() => ChangeTab(3)">📍 Config Pueblo</button>
+                <button class="@(tab == 4 ? "active" : "")" @onclick="() => ChangeTab(4)">🤝 Sponsors</button>
+                <button class="@(tab == 5 ? "active" : "")" @onclick="() => ChangeTab(5)">🕰️ Línea histórica</button>
+                <button class="@(tab == 6 ? "active" : "")" @onclick="() => ChangeTab(6)">💳 Colaborar</button>
+            </nav>
+
+            <div class="sidebar-foot">
+                <button class="btn-logout" @onclick="Logout">Cerrar sesión</button>
+            </div>
+        </aside>
+
+        <main class="content">
+            @if (tab == 1)
+{
+    <div class="panel">
+        <div class="panel-head">
+            <h2>Foro de intenciones</h2>
+            <span class="muted">Pendientes: @pendientesCount · Publicadas: @publicadasCount</span>
+        </div>
+
+        <h3 class="mt-4">Pendientes de moderación</h3>
+        <div class="card-grid mt-2">
+            @if (intenciones != null && intenciones.Any())
+            {
+                @foreach (var i in intenciones)
+                {
+                    <div class="mini-card">
+                        <div class="mini-card-head">
+                            <div>
+                                <strong>@(string.IsNullOrWhiteSpace(i.Nombre) ? "Anónimo" : i.Nombre)</strong>
+                                <div class="mini-card-date">@i.Fecha.ToString("dd/MM/yyyy HH:mm")</div>
+                            </div>
+                        </div>
+
+                        <p class="mini-card-text">@i.Texto</p>
+
+                        <div class="mini-card-meta">
+                            <span>🙏 Rezos: @i.Rezos</span>
+                        </div>
+
+                        <div class="admin-actions mt-2">
+                            <button class="btn-primary" @onclick="() => AprobarIntencion(i)">Aprobar</button>
+                            <button class="btn-secondary" @onclick="() => RechazarIntencion(i)">Rechazar</button>
+                            <button class="btn-danger" @onclick="() => BorrarIntencion(i)">Borrar</button>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <p class="admin-empty">No hay intenciones pendientes.</p>
+            }
+        </div>
+
+        <h3 class="mt-4">Intenciones publicadas</h3>
+        <div class="card-grid mt-2">
+            @if (intencionesPublicadas != null && intencionesPublicadas.Any())
+            {
+                @foreach (var i in intencionesPublicadas)
+                {
+                    <div class="mini-card">
+                        <div class="mini-card-head">
+                            <div>
+                                <strong>@(string.IsNullOrWhiteSpace(i.Nombre) ? "Anónimo" : i.Nombre)</strong>
+                                <div class="mini-card-date">@i.Fecha.ToString("dd/MM/yyyy HH:mm")</div>
+                            </div>
+                        </div>
+
+                        <p class="mini-card-text">@i.Texto</p>
+
+                        <div class="mini-card-meta">
+                            <span>🙏 Rezos: @i.Rezos</span>
+                        </div>
+
+                        <div class="admin-actions mt-2">
+                            <button class="btn-danger" @onclick="() => BorrarIntencionPublicada(i)">Borrar publicada</button>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <p class="admin-empty">No hay intenciones publicadas.</p>
+            }
+        </div>
+    </div>
+}
+
+            @if (tab == 2)
+            {
+                <div class="panel">
+                    <div class="panel-head">
+                        <h2>Reflexiones</h2>
+                    </div>
+
+                    <div class="form-box">
+                        <div class="form-row mt-2">
+                            <div class="field-group">
+                                <label>Título</label>
+                                <input @bind="nuevaReflexion.Titulo" placeholder="Título" />
+                            </div>
+
+                            <div class="field-group">
+                                <label>Autor</label>
+                                <input @bind="nuevaReflexion.Autor" placeholder="Autor" />
+                            </div>
+                        </div>
+
+                        <div class="field-group">
+                            <label>Resumen</label>
+                            <textarea @bind="nuevaReflexion.Contenido" rows="3" placeholder="Resumen corto para la tarjeta"></textarea>
+                        </div>
+
+                        <div class="field-group">
+                            <label>Ruta del PDF</label>
+                            <input @bind="nuevaReflexion.PdfUrl" placeholder="/pdfs/tu-archivo.pdf" />
+                            <small class="muted">
+                                Si el PDF está en <strong>wwwroot/pdfs</strong>, cargalo así:
+                                <strong>/pdfs/nombre-del-archivo.pdf</strong>
+                            </small>
+                        </div>
+                        @if (!string.IsNullOrWhiteSpace(GetSafePdfUrl(nuevaReflexion.PdfUrl)))
+                        {
+                            <div class="pdf-preview-box">
+                                <div class="preview-head">PDF listo para abrir</div>
+
+                                <div class="admin-actions mt-2">
+                                    <a href="@GetSafePdfUrl(nuevaReflexion.PdfUrl)"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    class="btn-secondary">
+                                        Abrir PDF
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                        <div class="admin-actions">
+                            <button class="btn-primary" @onclick="PublicarReflexion">Publicar</button>
+                            <button class="btn-secondary" type="button" @onclick="LimpiarNuevaReflexion">Limpiar</button>
+                        </div>
+
+                        <span class="feedback">@feedbackReflexion</span>
+                    </div>
+
+                    <div class="card-grid mt-4">
+                        @foreach (var r in reflexiones.OrderByDescending(x => x.Fecha))
+                        {
+                            <div class="mini-card">
+                                <strong>@r.Titulo</strong><br />
+                                <small>@r.Autor</small>
+
+                                @if (!string.IsNullOrWhiteSpace(GetSafePdfUrl(r.PdfUrl)))
+                                {
+                                    <div class="mini-chip">PDF cargado</div>
+
+                                    <div class="admin-actions mt-2">
+                                        <a href="@GetSafePdfUrl(r.PdfUrl)"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        class="btn-secondary">
+                                            Abrir PDF
+                                        </a>
+                                    </div>
+                                }
+
+                                <div class="admin-actions mt-2">
+                                    <button class="btn-danger" @onclick="() => BorrarReflexion(r)">Borrar</button>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            @if (tab == 3)
+            {
+                <div class="panel">
+                    <div class="panel-head">
+                        <h2>Configuración Pueblo</h2>
+                        <button class="btn-primary" @onclick="GuardarPueblo">💾 Guardar</button>
+                    </div>
+
+                    @if (puebloConfig != null)
+                    {
+                        <div class="form-box pueblo-admin-box">
+                            <div class="field-group">
+                                <label>Nombre del pueblo</label>
+                                <input @bind="puebloConfig.Nombre" placeholder="Ej: Las Flores" />
+                            </div>
+
+                            <div class="form-row">
+                                <div class="field-group">
+                                    <label>Provincia</label>
+                                    <input @bind="puebloConfig.Provincia" placeholder="Ej: Buenos Aires" />
+                                </div>
+
+                                <div class="field-group">
+                                    <label>País</label>
+                                    <input @bind="puebloConfig.Pais" placeholder="Ej: Argentina" />
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="field-group">
+                                    <label>Parroquia</label>
+                                    <input @bind="puebloConfig.Parroquia" placeholder="Ej: Parroquia San José" />
+                                </div>
+
+                                <div class="field-group">
+                                    <label>Fecha de misión</label>
+                                    <input @bind="puebloConfig.FechaMision" placeholder="Ej: Semana Santa 2026" />
+                                </div>
+                            </div>
+
+                            <div class="field-group">
+                                <label>Ubicación / texto corto</label>
+                                <input @bind="puebloConfig.UbicacionTexto" placeholder="Ej: Se publicará cuando el destino esté confirmado." />
+                            </div>
+
+                            <div class="field-group">
+                                <label>URL embed del mapa</label>
+                                <input @bind="puebloConfig.MapaEmbedUrl" placeholder="Pegá la URL embebida de Google Maps" />
+                            </div>
+
+                            <div class="field-group">
+                                <label>Historia del pueblo</label>
+                                <textarea @bind="puebloConfig.Historia" rows="5" placeholder="Historia del pueblo"></textarea>
+                            </div>
+
+                            <div class="field-group">
+                                <label>Comunidad</label>
+                                <textarea @bind="puebloConfig.Comunidad" rows="3" placeholder="Descripción de la comunidad"></textarea>
+                            </div>
+
+                            <div class="field-group">
+                                <label>Fecha de revelación</label>
+                                <input type="datetime-local"
+                                       value="@(puebloConfig.FechaRevelacion.ToString("yyyy-MM-ddTHH:mm"))"
+                                       @onchange="OnFechaRevelacionChanged" />
+                            </div>
+
+                            <hr class="admin-separator" />
+
+                            <div class="section-admin-head">
+                                <h3>Actividades</h3>
+                                <button type="button" class="btn-secondary" @onclick="AgregarActividad">+ Agregar actividad</button>
+                            </div>
+
+                            @if (puebloConfig.Actividades != null && puebloConfig.Actividades.Any())
+                            {
+                                @foreach (var actividad in puebloConfig.Actividades.Select((value, index) => new { value, index }))
+                                {
+                                    <div class="admin-card">
+                                        <div class="form-row">
+                                            <div class="field-group">
+                                                <label>Título</label>
+                                                <input @bind="actividad.value.Titulo" placeholder="Ej: Visita a familias" />
+                                            </div>
+
+                                            <div class="field-group">
+                                                <label>Ícono Material</label>
+                                                <input @bind="actividad.value.Icono" placeholder="Ej: church" />
+                                            </div>
+                                        </div>
+
+                                        <div class="field-group">
+                                            <label>Descripción</label>
+                                            <textarea @bind="actividad.value.Descripcion" rows="2" placeholder="Descripción de la actividad"></textarea>
+                                        </div>
+
+                                        <button type="button" class="btn-danger mt-2" @onclick="() => EliminarActividad(actividad.index)">Eliminar actividad</button>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <p class="admin-empty">No hay actividades cargadas.</p>
+                            }
+
+                            <hr class="admin-separator" />
+
+                            <div class="section-admin-head">
+                                <h3>Cronograma</h3>
+                                <button type="button" class="btn-secondary" @onclick="AgregarDiaCronograma">+ Agregar día</button>
+                            </div>
+
+                            @if (puebloConfig.Cronograma != null && puebloConfig.Cronograma.Any())
+                            {
+                                @foreach (var dia in puebloConfig.Cronograma.Select((value, index) => new { value, index }))
+                                {
+                                    <div class="admin-card">
+                                        <div class="form-row">
+                                            <div class="field-group">
+                                                <label>Día</label>
+                                                <input @bind="dia.value.Dia" placeholder="Ej: Jueves Santo" />
+                                            </div>
+
+                                            <div class="field-group">
+                                                <label>Título del día</label>
+                                                <input @bind="dia.value.Titulo" placeholder="Ej: Llegada" />
+                                            </div>
+                                        </div>
+
+                                        <div class="section-admin-head mt-2">
+                                            <h4>Horarios del día</h4>
+                                            <button type="button" class="btn-secondary" @onclick="() => AgregarSlot(dia.index)">+ Agregar horario</button>
+                                        </div>
+
+                                        @if (dia.value.Actividades != null && dia.value.Actividades.Any())
+                                        {
+                                            @foreach (var slot in dia.value.Actividades.Select((value, index) => new { value, index }))
+                                            {
+                                                <div class="slot-grid">
+                                                    <div class="field-group">
+                                                        <label>Hora</label>
+                                                        <input @bind="slot.value.Hora" placeholder="Ej: 10:00" />
+                                                    </div>
+
+                                                    <div class="field-group">
+                                                        <label>Descripción</label>
+                                                        <input @bind="slot.value.Descripcion" placeholder="Ej: Arribo" />
+                                                    </div>
+
+                                                    <div class="slot-actions">
+                                                        <button type="button" class="btn-danger" @onclick="() => EliminarSlot(dia.index, slot.index)">Eliminar</button>
+                                                    </div>
+                                                </div>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <p class="admin-empty">Este día todavía no tiene horarios.</p>
+                                        }
+
+                                        <button type="button" class="btn-danger mt-2" @onclick="() => EliminarDiaCronograma(dia.index)">Eliminar día</button>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <p class="admin-empty">No hay cronograma cargado.</p>
+                            }
+
+                            <span class="feedback">@feedbackPueblo</span>
+                        </div>
+                    }
+                </div>
+            }
+
+            @if (tab == 4)
+{
+    <div class="panel">
+        <div class="panel-head">
+            <h2>Sponsors</h2>
+        </div>
+
+        <div class="form-box">
+            <div class="field-group">
+                <label>Imagen del sponsor</label>
+                <input @bind="nuevoSponsor.ImagenUrl" placeholder="Ej: logo1.png" />
+                <small class="muted">
+                    Copiá antes la imagen en <strong>wwwroot/images/sponsors/</strong> y escribí solo el nombre del archivo.
+                </small>
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(nuevoSponsor.ImagenUrl))
+            {
+                <div class="image-preview-wrap">
+                    <img class="image-preview"
+                         src="@GetSponsorImage(nuevoSponsor.ImagenUrl)"
+                         alt="Preview sponsor"
+                         onerror="this.src='/img/LogoAdsum-Claro.png'" />
+                </div>
+            }
+
+            <div class="form-row">
+                <div class="field-group">
+                    <label>Nombre</label>
+                    <input @bind="nuevoSponsor.Nombre" placeholder="Nombre del sponsor" />
+                </div>
+
+                <div class="field-group">
+                    <label>Link / red social</label>
+                    <input @bind="nuevoSponsor.Link" placeholder="https://instagram.com/..." />
+                </div>
+            </div>
+
+            <div class="admin-actions">
+                <button class="btn-primary" @onclick="GuardarSponsor">
+                    @(string.IsNullOrWhiteSpace(sponsorEditKey) ? "Guardar sponsor" : "Actualizar sponsor")
+                </button>
+                <button class="btn-secondary" type="button" @onclick="LimpiarSponsor">Limpiar</button>
+            </div>
+        </div>
+
+        <div class="card-grid mt-4">
+            @foreach (var s in sponsors)
+            {
+                <div class="mini-card sponsor-card">
+                    @if (!string.IsNullOrWhiteSpace(s.ImagenUrl))
+                    {
+                        <img src="@GetSponsorImage(s.ImagenUrl)"
+                             alt="@s.Nombre"
+                             class="sponsor-thumb"
+                             onerror="this.src='/img/LogoAdsum-Claro.png'" />
+                    }
+
+                    <strong>@s.Nombre</strong>
+
+                    @if (!string.IsNullOrWhiteSpace(s.Link))
+                    {
+                        <small class="truncate">@s.Link</small>
+                    }
+
+                    <div class="admin-actions mt-2">
+                        <button class="btn-secondary" @onclick="() => EditarSponsor(s)">Editar</button>
+                        <button class="btn-danger" @onclick="() => BorrarSponsor(s)">Borrar</button>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+            @if (tab == 5)
+            {
+                <div class="panel">
+                    <div class="panel-head">
+                        <h2>Línea histórica</h2>
+                    </div>
+
+                    <div class="form-box">
+                        <div class="form-row">
+                            <div class="field-group">
+                                <label>Año</label>
+                                <input type="number" @bind="nuevoHistorico.Anio" />
+                            </div>
+
+                            <div class="field-group">
+                                <label>Lugar / pueblo</label>
+                                <input @bind="nuevoHistorico.Lugar" placeholder="Ej: Castelli" />
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="field-group">
+                                <label>Provincia</label>
+                                <input @bind="nuevoHistorico.Provincia" placeholder="Ej: Buenos Aires" />
+                            </div>
+
+                            <div class="field-group">
+                                <label>País</label>
+                                <input @bind="nuevoHistorico.Pais" placeholder="Ej: Argentina" />
+                            </div>
+                        </div>
+
+                        <div class="field-group">
+                            <label>Descripción</label>
+                            <textarea @bind="nuevoHistorico.Descripcion" rows="3" placeholder="Breve descripción para la línea histórica"></textarea>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="field-group">
+                                <label>Ubicación</label>
+                                <input @bind="nuevoHistorico.Ubicacion" placeholder="Ej: Castelli, Buenos Aires" />
+                            </div>
+
+                            <div class="field-group">
+                                <label>Parroquia</label>
+                                <input @bind="nuevoHistorico.Parroquia" placeholder="Ej: Parroquia Santa Rosa" />
+                            </div>
+                        </div>
+
+                        <div class="field-group">
+                            <label>Enfoque</label>
+                            <input @bind="nuevoHistorico.Enfoque" placeholder="Ej: Casa por casa y comunidad" />
+                        </div>
+
+                        <div class="field-group">
+                            <label>Fotos (una URL por línea)</label>
+                            <textarea @bind="nuevoHistorico.FotosTexto" rows="5" placeholder="https://..."></textarea>
+                        </div>
+
+                        <div class="admin-actions">
+                            <button class="btn-primary" @onclick="GuardarHistorico">
+                                @(string.IsNullOrWhiteSpace(historicoEditKey) ? "Guardar en línea histórica" : "Actualizar línea histórica")
+                            </button>
+                            <button class="btn-secondary" type="button" @onclick="LimpiarHistorico">Limpiar</button>
+                        </div>
+
+                        <span class="feedback">@feedbackHistorico</span>
+                    </div>
+
+                    <div class="card-grid mt-4">
+                        @foreach (var h in historicos.OrderByDescending(x => x.Anio))
+                        {
+                            <div class="admin-card">
+                                <div class="card-top">
+                                    <strong>@h.Anio · @h.Lugar</strong>
+                                    <span class="mini-chip">@h.Provincia, @h.Pais</span>
+                                </div>
+
+                                <p class="card-text">@h.Descripcion</p>
+
+                                @if (h.Fotos != null && h.Fotos.Any())
+                                {
+                                    <small class="truncate">@h.Fotos.Count foto(s) cargada(s)</small>
+                                }
+
+                                <div class="admin-actions mt-2">
+                                    <button class="btn-secondary" @onclick="() => EditarHistorico(h)">Editar</button>
+                                    <button class="btn-danger" @onclick="() => BorrarHistorico(h)">Borrar</button>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            @if (tab == 6)
+            {
+                <div class="panel">
+                    <div class="panel-head">
+                        <h2>Configurar Colaborar</h2>
+                        <button class="btn-primary" @onclick="GuardarColaborar">💾 Guardar</button>
+                    </div>
+
+                    <div class="form-box">
+                        <div class="form-row">
+                            <div class="field-group">
+                                <label>Alias</label>
+                                <input @bind="colaborarConfig.Alias" placeholder="Ej: adsum.pater" />
+                            </div>
+
+                            <div class="field-group">
+                                <label>CBU</label>
+                                <input @bind="colaborarConfig.Cbu" placeholder="CBU" />
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="field-group">
+                                <label>Titular</label>
+                                <input @bind="colaborarConfig.Titular" placeholder="Opcional" />
+                            </div>
+
+                            <div class="field-group">
+                                <label>Banco</label>
+                                <input @bind="colaborarConfig.Banco" placeholder="Opcional" />
+                            </div>
+                        </div>
+
+                        <div class="field-group">
+                            <label>Texto de la sección</label>
+                            <textarea @bind="colaborarConfig.Texto" rows="3" placeholder="Texto de ayuda / instrucción para colaborar"></textarea>
+                        </div>
+
+                        <span class="feedback">@feedbackColaborar</span>
+                    </div>
+                </div>
+            }
+        </main>
+    }
+</div>
+
+@code {
+    private const string NodeIntencionesPendientes = "intenciones_pendientes";
+    private const string NodeIntencionesPublicadas = "intenciones_publicadas";
+
+    private readonly string[] allowedEmails =
+    {
+        "1caceres.santiago5@gmail.com",
+        "lolecomito@gmail.com",
+        "caroseghini@gmail.com",
+        "pachifrisenberg@gmail.com",
+        "adsumpater@gmail.com"
+    };
+
+    private bool isLogged = false;
+    private bool showError = false;
+    private string emailIntentado = "";
+    private string adminNombre = "";
+    private int tab = 1;
+
+    private string feedbackReflexion = "";
+    private string feedbackPueblo = "";
+    private string feedbackHistorico = "";
+    private string feedbackColaborar = "";
+
+    private string sponsorEditKey = "";
+    private string historicoEditKey = "";
+
+    public class IntencionItem : Intencion
+    {
+        public string Key { get; set; } = "";
+    }
+
+    public class ReflexionItem : Reflexion
+    {
+        public string Key { get; set; } = "";
+    }
+
+    public class SponsorItem
+    {
+        public string Key { get; set; } = "";
+        public string Nombre { get; set; } = "";
+        public string ImagenUrl { get; set; } = "";
+        public string Link { get; set; } = "";
+    }
+
+    public class TestimonioItem
+    {
+        public string Autor { get; set; } = "";
+        public string Texto { get; set; } = "";
+        public string Rol { get; set; } = "Misionero";
+    }
+
+    public class HistoricoItem
+    {
+        public string Key { get; set; } = "";
+        public int Anio { get; set; } = DateTime.Now.Year;
+        public string Lugar { get; set; } = "";
+        public string Pueblo { get; set; } = "";
+        public string Provincia { get; set; } = "";
+        public string Pais { get; set; } = "Argentina";
+        public string Lema { get; set; } = "";
+        public string Descripcion { get; set; } = "";
+        public string Ubicacion { get; set; } = "";
+        public string Parroquia { get; set; } = "";
+        public string Enfoque { get; set; } = "";
+        public List<string> Fotos { get; set; } = new();
+        public List<TestimonioItem> Testimonios { get; set; } = new();
+        public string FotosTexto { get; set; } = "";
+        public string? AdminToken { get; set; }
+    }
+
+    public class ColaborarConfig
+    {
+        public string Alias { get; set; } = "";
+        public string Cbu { get; set; } = "";
+        public string Titular { get; set; } = "";
+        public string Banco { get; set; } = "";
+        public string Texto { get; set; } = "";
+        public string? AdminToken { get; set; }
+    }
+
+    public class GoogleUser
+    {
+        public string Email { get; set; } = "";
+        public string DisplayName { get; set; } = "";
+    }
+
+    private List<IntencionItem> intenciones = new();
+    private List<IntencionItem> intencionesPublicadas = new();
+    private List<ReflexionItem> reflexiones = new();
+    private PuebloViewModel puebloConfig = new();
+    private List<SponsorItem> sponsors = new();
+    private List<HistoricoItem> historicos = new();
+    private ColaborarConfig colaborarConfig = new();
+
+    private Reflexion nuevaReflexion = new();
+    private SponsorItem nuevoSponsor = new();
+    private HistoricoItem nuevoHistorico = new() { Anio = DateTime.Now.Year };
+
+    private int pendientesCount => intenciones.Count;
+    private int publicadasCount => intencionesPublicadas.Count;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var email = (await JS.InvokeAsync<string>("localStorage.getItem", "adsumUserEmail"))?.Trim().ToLowerInvariant() ?? "";
+        var nombre = await JS.InvokeAsync<string>("localStorage.getItem", "adsumUserNombre");
+
+        if (!string.IsNullOrWhiteSpace(email) && EsAdminHabilitado(email))
+        {
+            isLogged = true;
+            adminNombre = string.IsNullOrWhiteSpace(nombre) ? email : nombre;
+            await CargarTodo(cacheSegundos: 30);
+        }
+    }
+
+    private static string NormalizarEmail(string? email)
+        => (email ?? "").Trim().ToLowerInvariant();
+
+    private bool EsAdminHabilitado(string? email)
+        => allowedEmails.Any(x => NormalizarEmail(x) == NormalizarEmail(email));
+
+    private async Task ChangeTab(int t)
+    {
+        tab = t;
+
+        switch (tab)
+        {
+            case 1:
+                await CargarForo(30);
+                break;
+            case 2:
+                await CargarReflexiones(30);
+                break;
+            case 3:
+                await CargarPueblo(30);
+                break;
+            case 4:
+                await CargarSponsors(30);
+                break;
+            case 5:
+                await CargarHistoricos(30);
+                break;
+            case 6:
+                await CargarColaborar(30);
+                break;
+            default:
+                await CargarTodo(30);
+                break;
+        }
+    }
+
+    private string GetSponsorImage(string? imagen)
+{
+    if (string.IsNullOrWhiteSpace(imagen))
+        return "/img/LogoAdsum-Claro.png";
+
+    var limpia = imagen.Trim().Replace("\\", "/");
+
+    if (limpia.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+        limpia.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+        return limpia;
+
+    limpia = limpia.TrimStart('/');
+
+    if (limpia.StartsWith("img/", StringComparison.OrdinalIgnoreCase))
+        return "/" + limpia;
+
+    return $"/img/{limpia}";
+}
+
+    private async Task CargarTodo(int cacheSegundos = 0)
+    {
+        await Task.WhenAll(
+            CargarForo(cacheSegundos),
+            CargarReflexiones(cacheSegundos),
+            CargarPueblo(cacheSegundos),
+            CargarSponsors(cacheSegundos),
+            CargarHistoricos(cacheSegundos),
+            CargarColaborar(cacheSegundos)
+        );
+    }
+
+    private async Task CargarForo(int cache = 0)
+{
+    try
+    {
+        var pendientes = await Firebase.ObtenerDiccionario<Intencion>(NodeIntencionesPendientes, cache);
+        var publicadas = await Firebase.ObtenerDiccionario<Intencion>(NodeIntencionesPublicadas, cache);
+
+        intenciones = pendientes?
+            .Where(k => k.Value != null && !string.Equals(k.Key, "init", StringComparison.OrdinalIgnoreCase))
+            .Select(k => new IntencionItem
+            {
+                Key = k.Key,
+                Id = k.Value.Id,
+                Nombre = k.Value.Nombre,
+                Texto = k.Value.Texto,
+                Fecha = k.Value.Fecha,
+                Rezos = k.Value.Rezos
+            })
+            .OrderByDescending(x => x.Fecha)
+            .ToList() ?? new List<IntencionItem>();
+
+        intencionesPublicadas = publicadas?
+            .Where(k => k.Value != null && !string.Equals(k.Key, "init", StringComparison.OrdinalIgnoreCase))
+            .Select(k => new IntencionItem
+            {
+                Key = k.Key,
+                Id = k.Value.Id,
+                Nombre = k.Value.Nombre,
+                Texto = k.Value.Texto,
+                Fecha = k.Value.Fecha,
+                Rezos = k.Value.Rezos
+            })
+            .OrderByDescending(x => x.Fecha)
+            .ToList() ?? new List<IntencionItem>();
+
+        StateHasChanged();
+    }
+    catch
+    {
+    }
+}
+
+    private async Task CargarReflexiones(int cache = 0)
+    {
+        try
+        {
+            var d = await Firebase.ObtenerDiccionario<Reflexion>("reflexiones", cache);
+
+            reflexiones = d?
+                .Select(k => new ReflexionItem
+                {
+                    Key = k.Key,
+                    Id = k.Value.Id,
+                    Titulo = k.Value.Titulo,
+                    Autor = k.Value.Autor,
+                    Contenido = k.Value.Contenido,
+                    PdfUrl = k.Value.PdfUrl,
+                    PortadaUrl = k.Value.PortadaUrl,
+                    Fecha = k.Value.Fecha,
+                    AdminToken = k.Value.AdminToken
+                })
+                .OrderByDescending(x => x.Fecha)
+                .ToList() ?? new List<ReflexionItem>();
+
+            StateHasChanged();
+        }
+        catch
+        {
+        }
+    }
+
+    private async Task CargarPueblo(int cache = 0)
+    {
+        try
+        {
+            puebloConfig = await Firebase.ObtenerObjeto<PuebloViewModel>("pueblo", cache) ?? new PuebloViewModel();
+            StateHasChanged();
+        }
+        catch
+        {
+        }
+    }
+
+    private async Task CargarSponsors(int cache = 0)
+{
+    try
+    {
+        var d = await Firebase.ObtenerDiccionario<SponsorItem>("sponsors", cache);
+
+        sponsors = d?
+            .Select(k => new SponsorItem
+            {
+                Key = k.Key,
+                Nombre = k.Value.Nombre,
+                ImagenUrl = k.Value.ImagenUrl,
+                Link = k.Value.Link
+            })
+            .ToList() ?? new List<SponsorItem>();
+
+        StateHasChanged();
+    }
+    catch
+    {
+    }
+}
+
+    private async Task CargarHistoricos(int cache = 0)
+    {
+        try
+        {
+            var d = await Firebase.ObtenerDiccionario<HistoricoItem>("historia", cache);
+
+            historicos = d?
+                .Select(k =>
+                {
+                    var item = k.Value ?? new HistoricoItem();
+                    item.Key = k.Key;
+                    item.Fotos ??= new List<string>();
+                    item.Testimonios ??= new List<TestimonioItem>();
+                    item.FotosTexto = string.Join("\n", item.Fotos);
+                    return item;
+                })
+                .OrderByDescending(x => x.Anio)
+                .ToList() ?? new List<HistoricoItem>();
+
+            StateHasChanged();
+        }
+        catch
+        {
+        }
+    }
+
+    private async Task CargarColaborar(int cache = 0)
+    {
+        try
+        {
+            colaborarConfig = await Firebase.ObtenerObjeto<ColaborarConfig>("colaborar", cache) ?? new ColaborarConfig();
+            StateHasChanged();
+        }
+        catch
+        {
+        }
+    }
+
+    private async Task AprobarIntencion(IntencionItem item)
+    {
+        try
+        {
+            var publicada = new Intencion
+            {
+                Id = string.IsNullOrWhiteSpace(item.Id) ? Guid.NewGuid().ToString() : item.Id,
+                Nombre = item.Nombre,
+                Texto = item.Texto,
+                Fecha = item.Fecha,
+                Rezos = item.Rezos
+            };
+
+            var ok = await Firebase.ActualizarObjeto(NodeIntencionesPublicadas, item.Key, publicada);
+
+            if (ok)
+            {
+                await Firebase.Borrar(NodeIntencionesPendientes, item.Key);
+                await Firebase.LimpiarCache(NodeIntencionesPublicadas);
+                await Firebase.LimpiarCache(NodeIntencionesPendientes);
+                await CargarForo(0);
+            }
+        }
+        catch
+        {
+        }
+    }
+
+    private async Task RechazarIntencion(IntencionItem item)
+    {
+        if (await Confirm() && await Firebase.Borrar(NodeIntencionesPendientes, item.Key))
+        {
+            await Firebase.LimpiarCache(NodeIntencionesPendientes);
+            await CargarForo(0);
+        }
+    }
+
+    private async Task BorrarIntencion(IntencionItem item)
+    {
+        if (await Confirm() && await Firebase.Borrar(NodeIntencionesPendientes, item.Key))
+        {
+            await Firebase.LimpiarCache(NodeIntencionesPendientes);
+            await CargarForo(0);
+        }
+    }
+    private async Task BorrarIntencionPublicada(IntencionItem item)
+{
+    if (await Confirm() && await Firebase.Borrar(NodeIntencionesPublicadas, item.Key))
+    {
+        await Firebase.LimpiarCache(NodeIntencionesPublicadas);
+        await CargarForo(0);
+    }
+}
+
+    private async Task PublicarReflexion()
+    {
+        feedbackReflexion = "";
+
+        if (string.IsNullOrWhiteSpace(nuevaReflexion.Titulo))
+        {
+            feedbackReflexion = "⚠️ Ingresá un título";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(nuevaReflexion.Autor))
+        {
+            feedbackReflexion = "⚠️ Ingresá un autor";
+            return;
+        }
+
+        nuevaReflexion.Fecha = DateTimeOffset.Now;
+
+        if (await Firebase.Agregar("reflexiones", nuevaReflexion))
+        {
+            await Firebase.LimpiarCache("reflexiones");
+            LimpiarNuevaReflexion();
+            await CargarReflexiones(0);
+            feedbackReflexion = "✅ Publicada";
+        }
+        else
+        {
+            feedbackReflexion = "⛔ No se pudo publicar";
+        }
+    }
+
+    private async Task BorrarReflexion(ReflexionItem r)
+    {
+        if (await Confirm() && await Firebase.Borrar("reflexiones", r.Key))
+        {
+            await Firebase.LimpiarCache("reflexiones");
+            await CargarReflexiones(0);
+        }
+    }
+
+    private async Task GuardarPueblo()
+    {
+        feedbackPueblo = "";
+
+        if (string.IsNullOrWhiteSpace(puebloConfig.Nombre))
+        {
+            feedbackPueblo = "⚠️ Ingresá el nombre del pueblo";
+            return;
+        }
+
+        if (await Firebase.GuardarObjeto("pueblo", puebloConfig))
+        {
+            await Firebase.LimpiarCache("pueblo");
+            feedbackPueblo = "✅ Pueblo Guardado";
+        }
+        else
+        {
+            feedbackPueblo = "⛔ No se pudo guardar";
+        }
+    }
+
+   private async Task GuardarSponsor()
+{
+    if (string.IsNullOrWhiteSpace(nuevoSponsor.Nombre))
+        return;
+
+    if (string.IsNullOrWhiteSpace(nuevoSponsor.ImagenUrl))
+        return;
+
+    nuevoSponsor.Nombre = nuevoSponsor.Nombre.Trim();
+    nuevoSponsor.Link = (nuevoSponsor.Link ?? "").Trim();
+    nuevoSponsor.ImagenUrl = nuevoSponsor.ImagenUrl.Trim().Replace("\\", "/");
+
+    if (nuevoSponsor.ImagenUrl.StartsWith("/images/", StringComparison.OrdinalIgnoreCase))
+        nuevoSponsor.ImagenUrl = nuevoSponsor.ImagenUrl.Replace("/images/", "", StringComparison.OrdinalIgnoreCase);
+
+    if (nuevoSponsor.ImagenUrl.StartsWith("images/", StringComparison.OrdinalIgnoreCase))
+        nuevoSponsor.ImagenUrl = nuevoSponsor.ImagenUrl.Replace("images/", "", StringComparison.OrdinalIgnoreCase);
+
+    bool ok = string.IsNullOrEmpty(sponsorEditKey)
+        ? await Firebase.Agregar("sponsors", nuevoSponsor)
+        : await Firebase.ActualizarObjeto("sponsors", sponsorEditKey, nuevoSponsor);
+
+    if (ok)
+    {
+        await Firebase.LimpiarCache("sponsors");
+        LimpiarSponsor();
+        await CargarSponsors(0);
+    }
+}
+
+    private async Task BorrarSponsor(SponsorItem s)
+    {
+        if (await Confirm() && await Firebase.Borrar("sponsors", s.Key))
+        {
+            await Firebase.LimpiarCache("sponsors");
+            await CargarSponsors(0);
+        }
+    }
+
+    private async Task GuardarHistorico()
+    {
+        feedbackHistorico = "";
+
+        if (nuevoHistorico.Anio <= 0 || string.IsNullOrWhiteSpace(nuevoHistorico.Lugar))
+        {
+            feedbackHistorico = "⚠️ Completá al menos año y lugar";
+            return;
+        }
+
+        nuevoHistorico.Fotos = (nuevoHistorico.FotosTexto ?? "")
+            .Split('\n')
+            .Select(x => x.Trim())
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .ToList();
+
+        bool ok = string.IsNullOrEmpty(historicoEditKey)
+            ? await Firebase.Agregar("historia", nuevoHistorico)
+            : await Firebase.ActualizarObjeto("historia", historicoEditKey, nuevoHistorico);
+
+        if (ok)
+        {
+            await Firebase.LimpiarCache("historia");
+            LimpiarHistorico();
+            await CargarHistoricos(0);
+            feedbackHistorico = "✅ Guardado";
+        }
+        else
+        {
+            feedbackHistorico = "⛔ No se pudo guardar";
+        }
+    }
+
+    private async Task BorrarHistorico(HistoricoItem h)
+    {
+        if (await Confirm() && await Firebase.Borrar("historia", h.Key))
+        {
+            await Firebase.LimpiarCache("historia");
+            await CargarHistoricos(0);
+        }
+    }
+
+    private async Task GuardarColaborar()
+    {
+        feedbackColaborar = "";
+
+        if (string.IsNullOrWhiteSpace(colaborarConfig.Alias))
+        {
+            feedbackColaborar = "⚠️ Ingresá un alias";
+            return;
+        }
+
+        if (await Firebase.GuardarObjeto("colaborar", colaborarConfig))
+        {
+            await Firebase.LimpiarCache("colaborar");
+            feedbackColaborar = "✅ Colaborar Guardado";
+        }
+        else
+        {
+            feedbackColaborar = "⛔ No se pudo guardar";
+        }
+    }
+
+    private async Task LoginConGoogle()
+{
+    showError = false;
+    emailIntentado = "";
+
+    try
+    {
+        var user = await JS.InvokeAsync<GoogleUser>("googleLogin");
+
+        Console.WriteLine($"Login user null? {user == null}");
+        Console.WriteLine($"Login email: {user?.Email}");
+        Console.WriteLine($"Login displayName: {user?.DisplayName}");
+
+        var email = NormalizarEmail(user?.Email);
+
+        if (user != null && EsAdminHabilitado(email))
+        {
+            isLogged = true;
+            adminNombre = string.IsNullOrWhiteSpace(user.DisplayName) ? email : user.DisplayName;
+
+            await JS.InvokeVoidAsync("localStorage.setItem", "adsumUserEmail", email);
+            await JS.InvokeVoidAsync("localStorage.setItem", "adsumUserNombre", adminNombre);
+
+            await CargarTodo(0);
+        }
+        else
+        {
+            showError = true;
+            emailIntentado = user?.Email ?? "(sin email devuelto)";
+            await JS.InvokeVoidAsync("googleLogout");
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Error en LoginConGoogle: {ex.Message}");
+        showError = true;
+        emailIntentado = "(error JS / popup)";
+    }
+}
+
+    private async Task Logout()
+{
+    isLogged = false;
+    adminNombre = "";
+    showError = false;
+
+    await JS.InvokeVoidAsync("googleLogout");
+    await JS.InvokeVoidAsync("localStorage.removeItem", "adsumUserEmail");
+    await JS.InvokeVoidAsync("localStorage.removeItem", "adsumUserNombre");
+
+    Nav.NavigateTo("/admin", true);
+}
+
+    private void LimpiarNuevaReflexion()
+    {
+        nuevaReflexion = new Reflexion();
+        feedbackReflexion = "";
+    }
+
+   private void LimpiarSponsor()
+{
+    nuevoSponsor = new SponsorItem();
+    sponsorEditKey = "";
+}
+
+    private void LimpiarHistorico()
+    {
+        nuevoHistorico = new HistoricoItem { Anio = DateTime.Now.Year };
+        historicoEditKey = "";
+        feedbackHistorico = "";
+    }
+
+    private void EditarSponsor(SponsorItem s)
+{
+    nuevoSponsor = new SponsorItem
+    {
+        Key = s.Key,
+        Nombre = s.Nombre,
+        ImagenUrl = s.ImagenUrl,
+        Link = s.Link
+    };
+
+    sponsorEditKey = s.Key;
+}
+
+    private void EditarHistorico(HistoricoItem h)
+    {
+        nuevoHistorico = new HistoricoItem
+        {
+            Key = h.Key,
+            Anio = h.Anio,
+            Lugar = h.Lugar,
+            Pueblo = h.Pueblo,
+            Provincia = h.Provincia,
+            Pais = h.Pais,
+            Lema = h.Lema,
+            Descripcion = h.Descripcion,
+            Ubicacion = h.Ubicacion,
+            Parroquia = h.Parroquia,
+            Enfoque = h.Enfoque,
+            Fotos = h.Fotos?.ToList() ?? new List<string>(),
+            Testimonios = h.Testimonios?.ToList() ?? new List<TestimonioItem>(),
+            FotosTexto = string.Join("\n", h.Fotos ?? new List<string>()),
+            AdminToken = h.AdminToken
+        };
+
+        historicoEditKey = h.Key;
+    }
+
+    private async Task<bool> Confirm()
+        => await JS.InvokeAsync<bool>("confirm", "¿Estás seguro?");
+
+    private void OnFechaRevelacionChanged(ChangeEventArgs e)
+    {
+        if (DateTime.TryParse(e.Value?.ToString(), out var fecha))
+            puebloConfig.FechaRevelacion = new DateTimeOffset(fecha);
+    }
+
+    private void AgregarActividad()
+    {
+        puebloConfig.Actividades ??= new List<ActividadPueblo>();
+        puebloConfig.Actividades.Add(new ActividadPueblo());
+    }
+
+    private void EliminarActividad(int i)
+    {
+        if (puebloConfig.Actividades != null && i >= 0 && i < puebloConfig.Actividades.Count)
+            puebloConfig.Actividades.RemoveAt(i);
+    }
+
+    private void AgregarSlot(int i)
+    {
+        puebloConfig.Cronograma ??= new List<DiaCrono>();
+
+        if (i >= 0 && i < puebloConfig.Cronograma.Count)
+        {
+            puebloConfig.Cronograma[i].Actividades ??= new List<Slot>();
+            puebloConfig.Cronograma[i].Actividades.Add(new Slot());
+        }
+    }
+
+    private void EliminarSlot(int d, int s)
+    {
+        if (puebloConfig.Cronograma == null || d < 0 || d >= puebloConfig.Cronograma.Count)
+            return;
+
+        var dia = puebloConfig.Cronograma[d];
+        if (dia.Actividades != null && s >= 0 && s < dia.Actividades.Count)
+            dia.Actividades.RemoveAt(s);
+    }
+
+    private void AgregarDiaCronograma()
+    {
+        puebloConfig.Cronograma ??= new List<DiaCrono>();
+        puebloConfig.Cronograma.Add(new DiaCrono());
+    }
+
+    private void EliminarDiaCronograma(int i)
+    {
+        if (puebloConfig.Cronograma != null && i >= 0 && i < puebloConfig.Cronograma.Count)
+            puebloConfig.Cronograma.RemoveAt(i);
+    }
+
+    private string GetSafePdfUrl(string? rawUrl)
+    {
+        if (string.IsNullOrWhiteSpace(rawUrl))
+            return "";
+
+        var url = rawUrl.Trim().Replace("\\", "/");
+
+        if (url.StartsWith("data:application/pdf", StringComparison.OrdinalIgnoreCase))
+            return "";
+
+        if (url.StartsWith("file:///", StringComparison.OrdinalIgnoreCase))
+            url = url.Replace("file:///", "/");
+
+        if (Uri.TryCreate(url, UriKind.Absolute, out var absoluta))
+        {
+            if (absoluta.Scheme == Uri.UriSchemeHttp || absoluta.Scheme == Uri.UriSchemeHttps)
+                return absoluta.ToString();
+        }
+
+        url = url.TrimStart('~');
+
+        if (!url.StartsWith("/"))
+            url = "/" + url;
+
+        return Nav.ToAbsoluteUri(url).ToString();
+    }
+
+}

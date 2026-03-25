@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Adsum Pater</title>
+    <base href="/" />
+
+    <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
+    <link rel="stylesheet" href="css/app.css" />
+    <link href="AdsumPater.styles.css" rel="stylesheet" />
+
+    <link rel="icon" type="image/png" href="img/LogoAdsum-Claro.png" />
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+</head>
+
+<body>
+    <div id="app">
+        <div id="splash">
+            <div class="spinner"></div>
+            <div class="splash-text">Cargando Adsum Pater...</div>
+        </div>
+    </div>
+
+    <div id="blazor-error-ui">
+        An unhandled error has occurred.
+        <a href="" class="reload">Reload</a>
+        <a class="dismiss">🗙</a>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyAQKC0Tq7yuIX5D57Bl_JeQYJQbiwO1KN4",
+        authDomain: "proyecto-blazor-adsum.firebaseapp.com",
+        databaseURL: "https://proyecto-blazor-adsum-default-rtdb.firebaseio.com",
+        projectId: "proyecto-blazor-adsum",
+        storageBucket: "proyecto-blazor-adsum.firebasestorage.app",
+        messagingSenderId: "17885968313",
+        appId: "1:17885968313:web:c7d6bd747b86de99d0e868",
+        measurementId: "G-2WNN3X8JYL"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+
+    window.googleLogin = async () => {
+        const provider = new firebase.auth.GoogleAuthProvider();
+
+        try {
+            const result = await firebase.auth().signInWithPopup(provider);
+            const user = result.user;
+
+            console.log("googleLogin OK", user);
+
+            return {
+                email: user?.email || "",
+                displayName: user?.displayName || ""
+            };
+        } catch (error) {
+            console.error("Error Login:", error);
+            throw error;
+        }
+    };
+
+    window.googleLogout = async () => {
+        await firebase.auth().signOut();
+    };
+</script>
+
+    <script src="_framework/blazor.webassembly.js" autostart="false"></script>
+    <script>
+        Blazor.start().then(() => {
+            var splash = document.getElementById("splash");
+            if (splash) splash.remove();
+        }).catch(err => {
+            console.error("Error al iniciar Blazor:", err);
+        });
+    </script>
+
+    <script>
+        // NAMESPACE PRINCIPAL
+        window.adsum = window.adsum || {};
+        window.adsumNav = window.adsumNav || {};
+
+        // 1) Registro de Scroll unificado (Corrigiendo el error de consola)
+        window.adsum.registerScrollListener = function (dotnetRef) {
+            if (!dotnetRef) return;
+
+            const scrollHandler = () => {
+                dotnetRef.invokeMethodAsync("OnScroll", window.scrollY);
+            };
+
+            // Limpiamos listener previo para evitar duplicados
+            window.removeEventListener("scroll", window.adsum._currentHandler);
+            window.adsum._currentHandler = scrollHandler;
+            
+            window.addEventListener("scroll", scrollHandler, { passive: true });
+            scrollHandler(); // Ejecución inicial
+        };
+
+        // Aliado para el NavMenu
+        window.adsumNav.registerScroll = window.adsum.registerScrollListener;
+
+        // 2) Visibilidad de Navbar
+        window.adsum.setNavHidden = function (hidden) {
+            var nav = document.getElementById('mainNav') || document.querySelector('.topbar');
+            if (nav) {
+                if (hidden) {
+                    nav.classList.add('nav-hidden');
+                } else {
+                    nav.classList.remove('nav-hidden');
+                }
+            }
+        };
+
+        window.adsumNav.setBodyNavPadding = (enabled) => {
+            if (enabled) document.body.classList.add("has-topbar");
+            else document.body.classList.remove("has-topbar");
+        };
+
+        // 3) Scroll suave
+        window.scrollToElement = (elementId) => {
+            var element = document.getElementById(elementId);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        };
+
+        // 4) Animaciones de Contadores para el Home
+        window.iniciarAnimacionesHome = function () {
+            const counters = document.querySelectorAll('.stat-number');
+            counters.forEach(counter => {
+                const target = +counter.getAttribute('data-target');
+                if (!target) return;
+                
+                let count = 0;
+                const speed = target / 50; 
+                
+                const updateCount = () => {
+                    if (count < target) {
+                        count += speed;
+                        let prefix = (target >= 20) ? '+' : '';
+                        counter.innerText = prefix + Math.ceil(count);
+                        setTimeout(updateCount, 20);
+                    } else {
+                        counter.innerText = (target >= 20 ? '+' : '') + target;
+                    }
+                };
+                updateCount();
+            });
+        };
+
+        window.pdfHelper = {
+    toBlobUrl: function (dataUrl) {
+        if (!dataUrl || !dataUrl.startsWith("data:application/pdf;base64,")) {
+            return "";
+        }
+
+        const base64 = dataUrl.split(",")[1];
+        const byteCharacters = atob(base64);
+        const byteNumbers = new Array(byteCharacters.length);
+
+        for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: "application/pdf" });
+        return URL.createObjectURL(blob);
+    }
+};
+    </script>
+</body>
+</html>

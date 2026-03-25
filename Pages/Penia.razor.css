@@ -1,0 +1,135 @@
+:root {
+    --cafe: #281B13; --cafe-claro: #3e2f26; --ambar: #F7A343; --rojo: #B01B18;
+    --crema-fondo: #FAF6F5; --gris-claro: #e9ecef; --blanco: #ffffff;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --radius-lg: 1rem; --radius-xl: 1.5rem;
+}
+
+::deep * { font-family: 'Plus Jakarta Sans', sans-serif; box-sizing: border-box; }
+
+/* HERO SECTION */
+.hero-section {
+    position: relative; min-height: 550px; display: flex; align-items: center; justify-content: center; text-align: center; color: white;
+    background-color: var(--cafe);
+    background-image: linear-gradient(to bottom, rgba(40, 27, 19, 0.8), rgba(40, 27, 19, 0.6)), url('img/lh2.png');
+    background-size: cover; background-position: center;
+}
+.hero-container { position: relative; z-index: 2; max-width: 800px; padding: 20px; }
+.badge-hero { display: inline-block; padding: 8px 18px; background: rgba(247, 163, 67, 0.2); border: 1px solid rgba(247, 163, 67, 0.5); color: #ffca8b; border-radius: 50px; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 25px; backdrop-filter: blur(4px); }
+.hero-title { font-size: 3.5rem; font-weight: 900; line-height: 1.1; margin-bottom: 20px; text-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+.text-destacado { color: var(--ambar) !important; font-style: italic; }
+.hero-subtitle { font-size: 1.2rem; color: rgba(255, 255, 255, 0.9); margin-bottom: 35px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+.hero-actions { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; }
+
+/* BOTONES */
+.btn-custom { padding: 12px 28px; border-radius: 50px; font-weight: 700; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s; text-decoration: none; }
+.btn-white { background-color: #ffffff !important; color: #281B13 !important; border: 2px solid #ffffff !important; }
+.btn-white:hover { background-color: #f2f2f2 !important; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+.btn-outline-white { background-color: rgba(255,255,255,0.1) !important; border: 2px solid #ffffff !important; color: #ffffff !important; backdrop-filter: blur(4px); }
+.btn-outline-white:hover { background-color: rgba(255,255,255,0.2) !important; transform: translateY(-2px); }
+
+/* SECCIONES */
+.section { padding: 5rem 0; }
+.bg-light { background-color: var(--crema-fondo); }
+.container { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
+.section-header { text-align: center; margin-bottom: 3rem; }
+.section-title { font-size: 2.2rem; font-weight: 800; color: var(--cafe); margin-bottom: 0.5rem; }
+.section-desc { font-size: 1.1rem; color: #666; max-width: 700px; margin: 0 auto; }
+
+/* ABOUT GRID */
+.about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; }
+.text-column .overline { text-transform: uppercase; color: var(--rojo); font-weight: 700; letter-spacing: 1px; font-size: 0.9rem; }
+.text-content p { color: #555; line-height: 1.7; margin-bottom: 1rem; font-size: 1.05rem; }
+.stats-mini-grid { display: flex; gap: 1.5rem; margin-top: 2rem; }
+.stat-mini { display: flex; flex-direction: column; border-left: 3px solid var(--ambar); padding-left: 1rem; }
+.stat-k { font-size: 0.8rem; text-transform: uppercase; color: #888; font-weight: 700; }
+.stat-v { font-size: 1.1rem; font-weight: 800; color: var(--cafe); }
+
+/* COLLAGE */
+.collage-container { display: grid; grid-template-columns: 1.5fr 1fr; grid-template-rows: 1fr 1fr; gap: 15px; height: 450px; position: relative; }
+.collage-img { width: 100%; height: 100%; object-fit: cover; border-radius: 16px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); transition: transform 0.3s ease; }
+.collage-img:hover { transform: scale(1.02); }
+.collage-img.main { grid-column: 1 / 2; grid-row: 1 / 3; }
+.collage-img.sub-top { grid-column: 2 / 3; grid-row: 1 / 2; }
+.collage-img.sub-bottom { grid-column: 2 / 3; grid-row: 2 / 3; }
+
+/* FEATURES */
+.features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; }
+.feature-card { background: white; padding: 2rem; border-radius: 1.5rem; border: 1px solid #e2e8f0; box-shadow: var(--shadow-sm); transition: transform 0.2s; }
+.feature-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); }
+.icon-circle { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; }
+.icon-circle.amber { background: rgba(247, 163, 67, 0.15); color: var(--ambar); }
+.icon-circle.red { background: rgba(176, 27, 24, 0.1); color: var(--rojo); }
+.feature-card h3 { font-size: 1.25rem; font-weight: 700; color: var(--cafe); margin-bottom: 1rem; }
+.feature-card p { color: #666; font-size: 0.95rem; line-height: 1.5; }
+
+/* SPONSOR CTA (CON LOGO) */
+.cta-sponsor-card {
+    background: var(--rojo); color: white; border-radius: 2rem;
+    display: grid; grid-template-columns: 1.2fr 0.8fr; overflow: hidden;
+    box-shadow: 0 20px 40px rgba(176, 27, 24, 0.3);
+    position: relative;
+}
+.cta-content { padding: 4rem; display: flex; flex-direction: column; justify-content: center; position: relative; z-index: 2; }
+.pill { background: rgba(255,255,255,0.2); padding: 5px 12px; border-radius: 50px; font-size: 0.8rem; font-weight: 800; text-transform: uppercase; align-self: flex-start; margin-bottom: 1.5rem; }
+.cta-content h2 { font-size: 2.5rem; font-weight: 900; margin-bottom: 1.5rem; line-height: 1.1; }
+.cta-content p { font-size: 1.1rem; opacity: 0.9; margin-bottom: 2rem; line-height: 1.6; }
+.benefits-list { list-style: none; padding: 0; margin: 0 0 2.5rem 0; }
+.benefits-list li { margin-bottom: 0.8rem; display: flex; align-items: center; gap: 10px; font-weight: 500; }
+.check { background: white; color: var(--rojo); width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 900; }
+
+.cta-image { 
+    background: #921513; 
+    position: relative; 
+    min-height: 300px; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+.abstract-pattern { position: absolute; inset: 0; opacity: 0.1; background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 20px 20px; }
+
+/* ESTILO DEL LOGO ENMARCADO */
+.logo-overlay {
+    position: relative; z-index: 2;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    width: 250px; height: 250px;
+    display: flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(5px);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+    transform: rotate(-5deg);
+    transition: transform 0.3s ease;
+}
+.logo-overlay:hover { transform: rotate(0deg) scale(1.05); }
+
+.cta-logo {
+    width: 80%; 
+    height: auto; 
+    object-fit: contain;
+    filter: drop-shadow(0 10px 20px rgba(0,0,0,0.3));
+}
+
+/* SPONSORS GRID */
+.sponsors-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 2rem; margin-top: 2rem; }
+.sponsor-item { background: white; border: 1px solid #e2e8f0; border-radius: 1rem; height: 120px; display: flex; align-items: center; justify-content: center; padding: 1.5rem; transition: all 0.3s ease; }
+.sponsor-item img { max-width: 100%; max-height: 100%; object-fit: contain; filter: grayscale(100%) opacity(0.7); transition: all 0.3s ease; }
+.sponsor-item:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); border-color: var(--ambar); }
+.sponsor-item:hover img { filter: grayscale(0%) opacity(1); }
+.empty-state { text-align: center; padding: 3rem; color: #888; border: 2px dashed #ddd; border-radius: 1.5rem; }
+.btn-link { color: var(--rojo); font-weight: 700; text-decoration: underline; }
+.loading-state { text-align: center; padding: 3rem; color: #888; }
+.spinner { border: 3px solid #f3f3f3; border-top: 3px solid var(--rojo); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 0 auto 1rem; }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+/* Responsive */
+@media (max-width: 900px) {
+    .about-grid { grid-template-columns: 1fr; }
+    .cta-sponsor-card { grid-template-columns: 1fr; }
+    .cta-image { min-height: 200px; padding: 2rem; }
+    .logo-overlay { width: 150px; height: 150px; }
+    .cta-content { padding: 3rem 2rem; }
+    .collage-container { height: 350px; }
+}

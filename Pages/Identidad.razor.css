@@ -1,0 +1,268 @@
+:root {
+    --cafe: #281B13;
+    --cafe-claro: #3e2f26;
+    --ambar: #F7A343;
+    --rojo: #B01B18;
+    --crema-fondo: #FAF6F5;
+    --gris-claro: #e9ecef;
+    --blanco: #ffffff;
+    
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --radius-lg: 1rem;
+    --radius-xl: 1.5rem;
+}
+
+::deep * {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    box-sizing: border-box;
+}
+
+/* =========================================
+   HERO SECTION
+   ========================================= */
+.hero-section {
+    position: relative;
+    min-height: 450px; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: white;
+    background-color: var(--cafe);
+    
+    /* Imagen de fondo (puedes cambiar la URL por una foto de misión grupal) */
+    background-image: 
+        linear-gradient(to bottom, rgba(40, 27, 19, 0.8), rgba(40, 27, 19, 0.6)),
+        url('img/portadaIdentidad.jpeg');
+    background-size: cover;
+    background-position: center;
+}
+
+.hero-container {
+    position: relative;
+    z-index: 2;
+    max-width: 800px;
+    padding: 20px;
+}
+
+.badge-hero {
+    display: inline-block;
+    padding: 8px 18px;
+    background: rgba(176, 27, 24, 0.25);
+    border: 1px solid rgba(176, 27, 24, 0.6);
+    color: #ffbaba;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 25px;
+    backdrop-filter: blur(4px);
+}
+
+.hero-title {
+    font-size: 3rem;
+    font-weight: 900;
+    line-height: 1.1;
+    margin-bottom: 20px;
+}
+
+.text-destacado {
+    color: var(--ambar) !important; /* Ámbar para resaltar sobre oscuro */
+    font-style: italic;
+}
+
+.hero-subtitle {
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.9);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* =========================================
+   SECCIÓN GENERAL
+   ========================================= */
+.section { padding: 5rem 0; }
+.bg-light { background-color: var(--crema-fondo); }
+.container { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
+
+.section-header { text-align: center; margin-bottom: 3rem; }
+.section-title { font-size: 2.2rem; font-weight: 800; color: var(--cafe); margin-bottom: 0.5rem; }
+.section-desc { font-size: 1.1rem; color: #666; max-width: 700px; margin: 0 auto; }
+.badge-title {
+    color: var(--rojo); font-weight: 700; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px;
+    display: block; margin-bottom: 10px;
+}
+
+/* =========================================
+   MISIÓN & STATS GRID
+   ========================================= */
+.about-grid {
+    display: grid;
+    grid-template-columns: 1fr 0.8fr;
+    gap: 4rem;
+    align-items: center;
+}
+
+.text-column .overline {
+    text-transform: uppercase; color: var(--rojo); font-weight: 700; letter-spacing: 1px; font-size: 0.9rem;
+}
+.text-column h2 { margin-bottom: 1.5rem; }
+.text-content p { color: #555; line-height: 1.7; margin-bottom: 1rem; font-size: 1.05rem; }
+
+/* Stats Cards */
+.stats-column { display: flex; flex-direction: column; gap: 1.5rem; }
+.stats-row { display: flex; gap: 1.5rem; }
+
+.stat-card {
+    background: white; border: 1px solid #e2e8f0;
+    border-radius: 1.5rem; padding: 2rem;
+    text-align: center; box-shadow: var(--shadow-sm);
+    flex: 1;
+}
+
+.stat-card.primary {
+    background: var(--rojo); color: white; border: none;
+    box-shadow: 0 10px 25px -5px rgba(176, 27, 24, 0.4);
+}
+.stat-card.primary .stat-label { color: rgba(255,255,255,0.8); }
+
+.big-number { font-size: 4rem; font-weight: 900; line-height: 1; display: block; margin-bottom: 0.5rem; }
+.mid-number { font-size: 2.5rem; font-weight: 800; color: var(--cafe); display: block; margin-bottom: 0.5rem; }
+.stat-label { font-size: 0.9rem; text-transform: uppercase; font-weight: 700; letter-spacing: 1px; color: #888; }
+
+/* =========================================
+   ACTIVITIES GRID
+   ========================================= */
+.activities-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+}
+
+.activity-card {
+    background: white; padding: 2rem;
+    border-radius: 1.5rem; border: 1px solid #e2e8f0;
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.2s;
+}
+.activity-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); }
+
+.icon-circle {
+    width: 50px; height: 50px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 1.5rem;
+}
+.icon-circle.amber { background: rgba(247, 163, 67, 0.15); color: var(--ambar); }
+.icon-circle.red { background: rgba(176, 27, 24, 0.1); color: var(--rojo); }
+
+.activity-card h3 { font-size: 1.25rem; font-weight: 700; color: var(--cafe); margin-bottom: 1rem; }
+.activity-card p { color: #666; font-size: 0.95rem; line-height: 1.5; }
+
+/* =========================================
+   TIMELINE (HISTORIA)
+   ========================================= */
+.loading-state { text-align: center; padding: 3rem; color: #888; }
+.spinner { border: 3px solid #f3f3f3; border-top: 3px solid var(--rojo); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 0 auto 1rem; }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+.timeline-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.year-card {
+    background: white; border: 1px solid #e2e8f0;
+    border-radius: 1.25rem; padding: 1.5rem;
+    cursor: pointer; transition: all 0.2s;
+    display: flex; flex-direction: column;
+}
+.year-card:hover { border-color: var(--ambar); box-shadow: var(--shadow-lg); transform: translateY(-3px); }
+
+.year-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+.year-badge { background: var(--rojo); color: white; padding: 4px 10px; border-radius: 50px; font-weight: 700; font-size: 0.85rem; }
+.year-place { margin: 0; font-size: 1.1rem; font-weight: 700; color: var(--cafe); }
+.year-province { font-size: 0.85rem; color: #888; font-weight: 600; margin-bottom: 1rem; display: block; }
+.year-desc { font-size: 0.9rem; color: #555; line-height: 1.5; flex-grow: 1; margin-bottom: 1.5rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+
+.year-footer { border-top: 1px solid #f0f0f0; padding-top: 1rem; margin-top: auto; }
+.btn-link { color: var(--rojo); font-weight: 700; font-size: 0.9rem; display: flex; align-items: center; gap: 5px; }
+.btn-link .material-icons { font-size: 1rem; transition: transform 0.2s; }
+.year-card:hover .btn-link .material-icons { transform: translateX(3px); }
+
+/* =========================================
+   MODAL (REDISEÑO)
+   ========================================= */
+.modal-backdrop {
+    position: fixed; inset: 0; z-index: 2000;
+    background: rgba(40, 27, 19, 0.7);
+    backdrop-filter: blur(5px);
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+}
+
+.modal-container {
+    background: white; width: 100%; max-width: 1000px;
+    height: 85vh; border-radius: 1.5rem;
+    display: flex; flex-direction: column;
+    overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+    animation: slideUp 0.3s ease-out;
+}
+@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Header Modal */
+.modal-header {
+    background: var(--rojo); color: white; padding: 1.5rem;
+    display: flex; justify-content: space-between; align-items: center;
+}
+.modal-title-group { display: flex; align-items: center; gap: 15px; }
+.modal-year { background: rgba(255,255,255,0.2); padding: 5px 12px; border-radius: 50px; font-weight: 800; font-size: 1.1rem; }
+.modal-header h3 { margin: 0; font-size: 1.5rem; font-weight: 800; }
+.modal-subtitle { opacity: 0.9; font-size: 0.9rem; }
+.btn-close { background: rgba(255,255,255,0.2); border: none; color: white; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+.btn-close:hover { background: white; color: var(--rojo); }
+
+/* Layout Interno */
+.modal-content-grid {
+    display: grid; grid-template-columns: 1.2fr 1fr;
+    flex-grow: 1; overflow: hidden;
+}
+
+/* Fotos (Izquierda) */
+.modal-media { background: #1a1a1a; padding: 20px; display: flex; align-items: center; justify-content: center; }
+.photo-viewer { position: relative; width: 100%; height: 100%; max-height: 500px; border-radius: 10px; overflow: hidden; }
+.main-photo { width: 100%; height: 100%; object-fit: contain; background: black; }
+.photo-controls {
+    position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+    display: flex; align-items: center; gap: 10px;
+    background: rgba(0,0,0,0.6); padding: 5px 15px; border-radius: 50px;
+}
+.nav-btn { background: none; border: none; color: white; cursor: pointer; display: flex; }
+.photo-counter { color: white; font-size: 0.85rem; font-weight: 600; }
+
+/* Info (Derecha) */
+.modal-details { padding: 2rem; overflow-y: auto; background: var(--crema-fondo); }
+.detail-box { background: white; padding: 1.5rem; border-radius: 1rem; box-shadow: var(--shadow-sm); margin-bottom: 1.5rem; border: 1px solid #eee; }
+.detail-box h4 { color: var(--cafe); font-size: 1rem; font-weight: 800; text-transform: uppercase; margin-bottom: 1rem; border-bottom: 2px solid #f0f0f0; padding-bottom: 0.5rem; }
+
+.data-list { list-style: none; padding: 0; margin: 0; }
+.data-list li { margin-bottom: 0.8rem; display: flex; align-items: center; gap: 10px; color: #555; }
+.data-list .icon { color: var(--rojo); font-size: 1.2rem; }
+
+.testimonial-item { background: #f9f9f9; padding: 1rem; border-radius: 0.8rem; margin-bottom: 1rem; font-style: italic; border-left: 3px solid var(--ambar); }
+.testimonial-item small { display: block; margin-top: 5px; font-weight: 700; color: var(--cafe); font-style: normal; }
+
+/* Responsive */
+@media (max-width: 900px) {
+    .about-grid { grid-template-columns: 1fr; gap: 2rem; }
+    .stats-row { flex-direction: row; }
+    .modal-content-grid { grid-template-columns: 1fr; overflow-y: auto; }
+    .modal-media { min-height: 300px; }
+    .modal-container { height: 95vh; }
+}
+@media (max-width: 600px) {
+    .stats-row { flex-direction: column; }
+    .hero-title { font-size: 2.2rem; }
+}

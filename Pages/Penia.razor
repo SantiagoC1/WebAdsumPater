@@ -1,0 +1,234 @@
+@page "/penia"
+@using AdsumPater.Services
+@inject FirebaseService Firebase
+
+<PageTitle>Peña La Herencia | Adsum Pater</PageTitle>
+
+<section class="hero-section">
+    <div class="hero-overlay"></div>
+    <div class="container hero-container">
+        <span class="badge-hero">Evento a Beneficio</span>
+        <h1 class="hero-title">
+            La Herencia <br />
+            <span class="text-destacado">Peña folklórica</span>
+        </h1>
+        <p class="hero-subtitle">
+            Tradición, música y encuentro comunitario para acompañar el camino hacia la Misión de Semana Santa.
+        </p>
+        <div class="hero-actions">
+            <a href="https://www.instagram.com/laherenciatradicion/" class="btn-custom btn-white">Conocé el evento</a>
+            <a href="/colaborar#la-herencia" class="btn-custom btn-outline-white">Quiero ser Sponsor</a>
+        </div>
+    </div>
+</section>
+
+<section class="section" id="evento">
+    <div class="container">
+        <div class="about-grid">
+            <div class="text-column">
+                <span class="overline">Nuestra Propuesta</span>
+                <h2 class="section-title">¿Qué es La Herencia?</h2>
+                <div class="text-content">
+                    <p>
+                        La Peña “La Herencia” es el corazón de la recaudación previa a la misión. Un espacio de <strong>encuentro</strong> entre los jóvenes, las familias y la comunidad local.
+                    </p>
+                    <p>
+                        En un ambiente festivo, el evento reúne música en vivo, gastronomía y distintas propuestas que buscan celebrar nuestras tradiciones y compartir un momento de alegría en comunidad.
+                    </p>
+                </div>
+
+                <div class="stats-mini-grid">
+                    <div class="stat-mini">
+                        <span class="stat-k">Convocatoria</span>
+                        <span class="stat-v">~400 Personas</span>
+                    </div>
+                    <div class="stat-mini">
+                        <span class="stat-k">Formato</span>
+                        <span class="stat-v">Música + Buffet</span>
+                    </div>
+                    <div class="stat-mini">
+                        <span class="stat-k">Objetivo</span>
+                        <span class="stat-v">Sostener la Misión</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-column">
+                <div class="collage-container">
+                    <img src="img/lh51.jpg" class="collage-img main" alt="Guitarreada" />
+                    <img src="img/lh110.jpg" class="collage-img sub-top" alt="Empanadas" />
+                    <img src="img/lh177.jpg" class="collage-img sub-bottom" alt="Comunidad" />
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section bg-light">
+    <div class="container">
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="icon-circle amber"><span class="material-icons">groups</span></div>
+                <h3>Gran Convocatoria</h3>
+                <p>Cientos de personas reunidas en una misma noche para celebrar.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon-circle red"><span class="material-icons">music_note</span></div>
+                <h3>Música en Vivo</h3>
+                <p>Artistas locales y regionales trayendo lo mejor de nuestro folklore.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon-circle amber"><span class="material-icons">restaurant</span></div>
+                <h3>Buffet</h3>
+                <p>Podrán disfrutar de diversas opciones para comer y beber, incluyendo menú celíaco y veggie.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon-circle red"><span class="material-icons">card_giftcard</span></div>
+                <h3>Sorteos</h3>
+                <p>Premios donados por comercios amigos que se suman a la causa.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="cta-sponsor-card">
+            <div class="cta-content">
+                <span class="pill">Empresas & Comercios</span>
+                <h2>¿Por qué ser Sponsor?</h2>
+                <p>
+                    Acompañar La Herencia es apoyar una misión concreta con visibilidad real. Tu marca estará presente en un evento que transforma.
+                </p>
+                <ul class="benefits-list">
+                    <li><span class="check">✔</span> Presencia destacada en la web y redes.</li>
+                    <li><span class="check">✔</span> Menciones en vivo durante el evento.</li>
+                    <li><span class="check">✔</span> Asociación con valores de familia y solidaridad.</li>
+                </ul>
+                <div class="cta-actions">
+                    <a href="https://www.instagram.com/laherenciatradicion/" class="btn-custom btn-white">Contactanos</a>
+                </div>
+            </div>
+
+            <div class="cta-image">
+                <div class="abstract-pattern"></div>
+                <div class="logo-overlay">
+                    <img src="img/logoHerencia.png"
+                         alt="Logo Peña La Herencia"
+                         class="cta-logo"
+                         onerror="this.style.display='none'" />
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section bg-light" id="sponsors">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Nos Acompañan</h2>
+            <p class="section-desc">Gracias a quienes hacen posible este sueño.</p>
+        </div>
+
+        @if (Cargando)
+        {
+            <div class="loading-state">
+                <div class="spinner"></div>
+                <p>Cargando sponsors...</p>
+            </div>
+        }
+        else if (Sponsors.Count == 0)
+        {
+            <div class="empty-state">
+                <span class="material-icons">volunteer_activism</span>
+                <p>Aún no hay sponsors cargados. ¡Sé el primero!</p>
+                <a href="/contacto" class="btn-link">Sumate hoy</a>
+            </div>
+        }
+        else
+        {
+            <div class="sponsors-grid">
+                @foreach (var s in Sponsors)
+                {
+                    <a href="@GetSponsorLink(s)"
+                       target="_blank"
+                       rel="noopener"
+                       class="sponsor-item"
+                       title="@s.Nombre">
+                        <img src="@GetSponsorImage(s)"
+                             alt="@s.Nombre"
+                             onerror="this.onerror=null; this.src='/img/LogoAdsum-Claro.png';" />
+                    </a>
+                }
+            </div>
+        }
+    </div>
+</section>
+
+@code {
+    private List<SponsorViewModel> Sponsors = new();
+    private bool Cargando = true;
+
+    public class SponsorViewModel
+    {
+        public string Nombre { get; set; } = "";
+        public string ImagenUrl { get; set; } = "";
+        public string LogoUrl { get; set; } = "";
+        public string Link { get; set; } = "";
+        public string LinkWeb { get; set; } = "";
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var d = await Firebase.ObtenerDiccionario<SponsorViewModel>("sponsors", cacheSegundos: 600);
+
+            if (d != null)
+            {
+                Sponsors = d.Values
+                    .Where(x => !string.IsNullOrWhiteSpace(x.Nombre))
+                    .ToList();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error cargando sponsors: " + ex.Message);
+        }
+        finally
+        {
+            Cargando = false;
+        }
+    }
+
+    private static string GetSponsorImage(SponsorViewModel s)
+    {
+        var imagen = !string.IsNullOrWhiteSpace(s.ImagenUrl) ? s.ImagenUrl : s.LogoUrl;
+
+        if (string.IsNullOrWhiteSpace(imagen))
+            return "/img/LogoAdsum-Claro.png";
+
+        var limpia = imagen.Trim().Replace("\\", "/");
+
+        if (limpia.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+            limpia.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+            return limpia;
+
+        limpia = limpia.TrimStart('/');
+
+        if (limpia.StartsWith("img/", StringComparison.OrdinalIgnoreCase))
+            return "/" + limpia;
+
+        return $"/img/{limpia}";
+    }
+
+    private static string GetSponsorLink(SponsorViewModel s)
+    {
+        var link = !string.IsNullOrWhiteSpace(s.Link) ? s.Link : s.LinkWeb;
+
+        if (string.IsNullOrWhiteSpace(link))
+            return "#";
+
+        return link.Trim();
+    }
+}

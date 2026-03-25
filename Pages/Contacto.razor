@@ -1,0 +1,302 @@
+@page "/contacto"
+@using System.Text.RegularExpressions
+@using AdsumPater.Services
+@inject NavigationManager Nav
+@inject FirebaseService Firebase
+
+<PageTitle>Contacto - Adsum Pater</PageTitle>
+
+<section class="hero-section">
+    <div class="hero-overlay"></div>
+    <div class="container hero-container">
+        <span class="badge-hero">Estamos para vos</span>
+        <h1 class="hero-title">
+            Hablemos <br />
+            <span class="text-destacado">de Misión</span>
+        </h1>
+        <p class="hero-subtitle">
+            ¿Tenés dudas? ¿Querés sumarte? ¿O simplemente dejarnos una intención? Escribinos, te leemos.
+        </p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="contact-grid">
+
+            <div class="form-column">
+                <div class="card contact-card">
+                    <div class="card-header">
+                        <h3>Envianos un mensaje</h3>
+                        <p>Te responderemos a la brevedad por mail o WhatsApp.</p>
+                    </div>
+
+                    @if (enviadoExito)
+                    {
+                        <div class="success-state">
+                            <div class="icon-circle green">
+                                <span class="material-icons">check_circle</span>
+                            </div>
+                            <h3>¡Mensaje Enviado!</h3>
+                            <p>Gracias por escribirnos. Pronto nos pondremos en contacto.</p>
+                            <button class="btn-custom btn-outline" @onclick="ResetForm">Enviar otro mensaje</button>
+                        </div>
+                    }
+                    else
+                    {
+                        <form class="contact-form" @onsubmit="Enviar" @onsubmit:preventDefault="true">
+                            <div class="form-group full-width">
+                                <label>Nombre y Apellido</label>
+                                <input class="form-control @(MostrarErrores && !NombreValido ? "input-error" : "")"
+                                       @bind="nuevoMensaje.Nombre"
+                                       @bind:event="oninput"
+                                       placeholder="Tu nombre y apellido" />
+
+                                @if (MostrarErrores && !NombreValido)
+                                {
+                                    <span class="field-error">@ErrorNombre</span>
+                                }
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label>Email</label>
+                                <input class="form-control @(MostrarErrores && !EmailValido ? "input-error" : "")"
+                                       type="email"
+                                       @bind="nuevoMensaje.Email"
+                                       @bind:event="oninput"
+                                       placeholder="tucorreo@ejemplo.com" />
+
+                                @if (MostrarErrores && !EmailValido)
+                                {
+                                    <span class="field-error">@ErrorEmail</span>
+                                }
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label>Mensaje</label>
+                                <textarea class="form-control @(MostrarErrores && !MensajeValido ? "input-error" : "")"
+                                          rows="5"
+                                          @bind="nuevoMensaje.Texto"
+                                          @bind:event="oninput"
+                                          placeholder="¿En qué podemos ayudarte?"></textarea>
+
+                                @if (MostrarErrores && !MensajeValido)
+                                {
+                                    <span class="field-error">@ErrorMensaje</span>
+                                }
+                            </div>
+
+                            <div class="form-footer full-width">
+                                @if (!string.IsNullOrEmpty(mensajeError))
+                                {
+                                    <div class="error-msg">
+                                        <span class="material-icons">error</span> @mensajeError
+                                    </div>
+                                }
+
+                                <button type="submit" class="btn-custom btn-rojo btn-block" disabled="@enviando">
+                                    @(enviando ? "Enviando..." : "Enviar Mensaje")
+                                </button>
+                            </div>
+                        </form>
+                    }
+                </div>
+            </div>
+
+            <div class="info-column">
+
+                <div class="card info-card">
+                    <h3>Otros Canales</h3>
+                    <div class="info-list">
+                        <a href="mailto:adsumpater@gmail.com" class="info-item">
+                            <div class="icon-box">
+                                <span class="material-icons">mail</span>
+                            </div>
+                            <div>
+                                <span class="label">Email</span>
+                                <span class="value">adsumpater@gmail.com</span>
+                            </div>
+                        </a>
+                        <a href="https://instagram.com/adsumpater" target="_blank" class="info-item">
+                            <div class="icon-box">
+                                <span class="material-icons">photo_camera</span>
+                            </div>
+                            <div>
+                                <span class="label">Instagram</span>
+                                <span class="value">adsumpater</span>
+                            </div>
+                        </a>
+                        <a href="https://www.instagram.com/laherenciatradicion/" target="_blank" class="info-item">
+                            <div class="icon-box">
+                                <span class="material-icons">photo_camera</span>
+                            </div>
+                            <div>
+                                <span class="label">Instagram</span>
+                                <span class="value">La Herencia</span>
+                            </div>
+                        </a>
+                        <div class="info-item">
+                            <div class="icon-box">
+                                <span class="material-icons">location_on</span>
+                            </div>
+                            <div>
+                                <span class="label">Sede</span>
+                                <span class="value">Calle 15 y Av. 53, La Plata</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card map-card">
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d4033.761076892361!2d-57.95839142339888!3d-34.92381617447522!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x95a2e62e9aed23e3%3A0xfe0688aee452566f!2sSantuario%20de%20Schoenstatt!5e1!3m2!1ses!2sar!4v1767638373060!5m2!1ses!2sar"
+                            width="100%" height="350" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                    <div class="map-footer">
+                        <a href="https://maps.app.goo.gl/9eVNpxNABAdtra7f8" target="_blank" class="btn-link">
+                            Abrir en Google Maps <span class="material-icons">open_in_new</span>
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section bg-light">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Preguntas Frecuentes</h2>
+            <p class="section-desc">Quizás tu duda ya tiene respuesta.</p>
+        </div>
+
+        <div class="faq-grid">
+            <div class="faq-item">
+                <h4>¿Cuándo es la próxima misión?</h4>
+                <p>La misión central es siempre en Semana Santa (Jueves Santo a Domingo de Pascua). Las inscripciones suelen abrir un mes antes.</p>
+            </div>
+            <div class="faq-item">
+                <h4>¿Tengo que ser estudiante de la UNLP?</h4>
+                <p>No es excluyente, pero la misión está enfocada en jóvenes universitarios o terciarios de entre 18 y 26 años.</p>
+            </div>
+            <div class="faq-item">
+                <h4>¿Qué tengo que llevar?</h4>
+                <p>Bolsa de dormir, aislante, ropa cómoda para trabajar, cubiertos y, sobre todo, ¡muchas ganas de servir!</p>
+            </div>
+            <div class="faq-item">
+                <h4>¿Cómo puedo colaborar si no voy?</h4>
+                <p>Podés ayudarnos con donaciones monetarias, alimentos no perecederos o premios para nuestra peña anual. <a href="/colaborar">Ver cómo colaborar</a>.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+@code {
+    private MensajeContacto nuevoMensaje = new();
+    private bool enviando = false;
+    private bool enviadoExito = false;
+    private bool MostrarErrores = false;
+    private string mensajeError = "";
+
+    private bool NombreValido =>
+        !string.IsNullOrWhiteSpace(nuevoMensaje.Nombre) &&
+        Regex.IsMatch(nuevoMensaje.Nombre.Trim(), @"^[A-Za-zÁÉÍÓÚáéíóúÑñÜü\s]+$");
+
+    private bool EmailValido =>
+        !string.IsNullOrWhiteSpace(nuevoMensaje.Email) &&
+        Regex.IsMatch(nuevoMensaje.Email.Trim(), @"^[^@\s]+@[^@\s]+\.[^@\s]+$");
+
+    private bool MensajeValido =>
+        !string.IsNullOrWhiteSpace(nuevoMensaje.Texto);
+
+    private string ErrorNombre
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(nuevoMensaje.Nombre))
+                return "Ingresá tu nombre y apellido.";
+
+            if (!Regex.IsMatch(nuevoMensaje.Nombre.Trim(), @"^[A-Za-zÁÉÍÓÚáéíóúÑñÜü\s]+$"))
+                return "El nombre y apellido solo puede contener letras y espacios.";
+
+            return "";
+        }
+    }
+
+    private string ErrorEmail
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(nuevoMensaje.Email))
+                return "Ingresá tu email.";
+
+            if (!Regex.IsMatch(nuevoMensaje.Email.Trim(), @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
+                return "Ingresá un email válido.";
+
+            return "";
+        }
+    }
+
+    private string ErrorMensaje
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(nuevoMensaje.Texto))
+                return "El mensaje no puede estar vacío.";
+
+            return "";
+        }
+    }
+
+    private async Task Enviar()
+    {
+        mensajeError = "";
+        MostrarErrores = true;
+
+        if (!NombreValido || !EmailValido || !MensajeValido)
+        {
+            mensajeError = "Revisá los campos marcados antes de enviar.";
+            return;
+        }
+
+        enviando = true;
+
+        try
+        {
+            nuevoMensaje.Nombre = nuevoMensaje.Nombre.Trim();
+            nuevoMensaje.Email = nuevoMensaje.Email.Trim();
+            nuevoMensaje.Texto = nuevoMensaje.Texto.Trim();
+            nuevoMensaje.Fecha = DateTimeOffset.Now;
+
+            await Firebase.Agregar("mensajes_contacto", nuevoMensaje);
+
+            enviadoExito = true;
+            nuevoMensaje = new();
+            MostrarErrores = false;
+            mensajeError = "";
+        }
+        catch (Exception)
+        {
+            mensajeError = "Hubo un error al enviar. Intenta de nuevo más tarde.";
+        }
+        finally
+        {
+            enviando = false;
+        }
+    }
+
+    private void ResetForm()
+    {
+        enviadoExito = false;
+        mensajeError = "";
+        MostrarErrores = false;
+        nuevoMensaje = new();
+    }
+
+    public class MensajeContacto
+    {
+        public string Nombre { get; set; } = "";
+        public string Email { get; set; } = "";
+        public string Texto { get; set; } = "";
+        public DateTimeOffset Fecha { get; set; }
+    }
+}

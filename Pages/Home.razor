@@ -1,0 +1,177 @@
+﻿@page "/"
+@inject NavigationManager Nav
+@inject IJSRuntime JS
+@implements IDisposable
+
+<PageTitle>Inicio - Adsum Pater</PageTitle>
+
+<header class="hero">
+    <div class="hero-content">
+        <img src="img/LogoAdsum-Claro.png" alt="Logo Adsum Pater" class="main-logo" />
+
+        <h1 class="main-title">ADSUM PATER</h1>
+        <p class="subtitle">Aquí estoy, Padre</p>
+
+        <div class="hero-actions">
+            <a class="btn btn-primary" href="colaborar">Colaborar</a>
+            <a class="btn btn-ghost" href="identidad">Conocé la misión</a>
+        </div>
+
+        <div class="stats-container">
+            <div class="stat-item">
+                <span class="stat-number" data-target="20">@Years</span>
+                <p class="stat-label">Años misionando</p>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" data-target="400">+@Misioneros</span>
+                <p class="stat-label">Misioneros</p>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" data-target="10">+@Pueblos</span>
+                <p class="stat-label">Pueblos misionados</p>
+            </div>
+        </div>
+
+        <div class="scroll-indicator">↓ Desliza para ver más</div>
+    </div>
+</header>
+
+<section class="paneles-section">
+    <div class="container-title">
+        <span class="overline">Explorá</span>
+        <h2 class="section-title">Nuestra Misión</h2>
+    </div>
+
+    <div class="vertical-container" id="paneles">
+        @for (int i = 0; i < Panels.Count; i++)
+        {
+            var index = i;
+            var p = Panels[i];
+            bool isActive = ActivePanelIndex == i;
+
+            <a href="@p.Href"
+               class="panel @(isActive ? "active" : "")"
+               style="background-image:url('@p.BgUrl');"
+               @onmouseenter="() => ActivePanelIndex = index"
+               @onclick:preventDefault="!isActive"
+               @onclick="() => OnPanelClick(index)">
+
+                <div class="panel-overlay"></div>
+
+                <div class="panel-collapsed-label">
+                    <span>@p.Label</span>
+                </div>
+
+                <div class="panel-border"></div>
+
+                <div class="panel-content">
+                    <span class="panel-category">@p.Label</span>
+                    <h3>@p.Title</h3>
+                    <p class="panel-desc">@p.Desc</p>
+                    <span class="panel-cta">
+                        Ver más <i class="material-icons">arrow_forward</i>
+                    </span>
+                </div>
+            </a>
+        }
+    </div>
+</section>
+
+@code {
+    private bool _navHidden = true;
+    private DotNetObjectReference<Home>? _objRef;
+    private System.Threading.Timer? _timer;
+
+    private int Years = 0;
+    private int Misioneros = 0;
+    private int Pueblos = 0;
+
+    private readonly int TargetYears = 20;
+    private readonly int TargetMisioneros = 400;
+    private readonly int TargetPueblos = 10;
+
+    private int ActivePanelIndex = 0;
+
+    private readonly List<HomePanel> Panels = new()
+    {
+        new HomePanel("Identidad", "Quiénes Somos", "Nuestra historia y carisma.", "identidad", "img/QueEs.jpg"),
+        new HomePanel("Adsum 2026", "Misión Actual", "Preparando el próximo destino.", "adsum-2026", "img/portadaIdentidad.jpeg"),
+        new HomePanel("La Herencia", "Nuestra Peña", "Cultura, folklore y comunidad.", "penia", "img/lh1.png"),
+        new HomePanel("Contacto", "Escribinos", "Estamos para escucharte.", "contacto", "img/contacto3.png"),
+        new HomePanel("Colaborar", "Donaciones", "Ayudanos a seguir misionando.", "colaborar", "img/donacion4.png"),
+    };
+
+    private void OnPanelClick(int index)
+    {
+        if (ActivePanelIndex != index)
+            ActivePanelIndex = index;
+    }
+
+    protected override void OnInitialized()
+    {
+        StartCounters();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await SetBodyNavHidden(true);
+
+            _objRef = DotNetObjectReference.Create(this);
+            await RegisterScrollListener(_objRef);
+        }
+    }
+
+    private void StartCounters()
+    {
+        const int durationMs = 1500;
+        const int intervalMs = 20;
+        int steps = durationMs / intervalMs;
+        int step = 0;
+
+        _timer = new System.Threading.Timer(_ =>
+        {
+            step++;
+            double t = Math.Min(1.0, (double)step / steps);
+
+            Years = (int)(TargetYears * t);
+            Misioneros = (int)(TargetMisioneros * t);
+            Pueblos = (int)(TargetPueblos * t);
+
+            InvokeAsync(StateHasChanged);
+
+            if (t >= 1.0)
+            {
+                _timer?.Dispose();
+                _timer = null;
+            }
+        }, null, 0, intervalMs);
+    }
+
+    [JSInvokable]
+    public async Task OnScroll(double scrollY)
+    {
+        bool shouldHide = scrollY <= 40;
+
+        if (shouldHide != _navHidden)
+        {
+            _navHidden = shouldHide;
+            await SetBodyNavHidden(_navHidden);
+        }
+    }
+
+    private Task RegisterScrollListener(DotNetObjectReference<Home> objRef)
+        => JS.InvokeVoidAsync("adsum.registerScrollListener", objRef).AsTask();
+
+    private Task SetBodyNavHidden(bool hidden)
+        => JS.InvokeVoidAsync("adsum.setNavHidden", hidden).AsTask();
+
+    public void Dispose()
+    {
+        _timer?.Dispose();
+        _objRef?.Dispose();
+    }
+
+    private record HomePanel(string Label, string Title, string Desc, string Href, string BgUrl);
+}

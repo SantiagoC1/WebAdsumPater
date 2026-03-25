@@ -1,0 +1,930 @@
+@page "/adsum-2026"
+
+@using AdsumPater.Models
+@using AdsumPater.Services
+@inject FirebaseService Firebase
+@inject IJSRuntime JS
+@implements IDisposable
+@inject NavigationManager NavManager
+
+<PageTitle>Adsum 2026 - Adsum Pater</PageTitle>
+
+@if (Cargando)
+{
+    <div class="adsum-screen-loader">
+        <div class="adsum-screen-loader__bg"></div>
+
+        <div class="adsum-screen-loader__content">
+            <div class="adsum-screen-loader__logo-wrap">
+                <div class="adsum-screen-loader__ring"></div>
+                <img src="img/LogoColorAdsum.png" alt="Adsum Pater" class="adsum-screen-loader__logo" />
+            </div>
+
+            <span class="adsum-screen-loader__eyebrow">Adsum Pater</span>
+            <h2 class="adsum-screen-loader__title">Preparando el camino...</h2>
+            <p class="adsum-screen-loader__text">@LoadingMessage</p>
+
+            <div class="adsum-screen-loader__progress">
+                <div class="adsum-screen-loader__progress-bar"></div>
+            </div>
+
+            <div class="adsum-screen-loader__skeleton">
+                <div class="adsum-screen-loader__card adsum-screen-loader__card--large">
+                    <div class="adsum-skeleton adsum-skeleton--badge"></div>
+                    <div class="adsum-skeleton adsum-skeleton--title"></div>
+                    <div class="adsum-skeleton adsum-skeleton--line"></div>
+                    <div class="adsum-skeleton adsum-skeleton--line short"></div>
+                    <div class="adsum-skeleton adsum-skeleton--map"></div>
+                </div>
+
+                <div class="adsum-screen-loader__side">
+                    <div class="adsum-screen-loader__card">
+                        <div class="adsum-skeleton adsum-skeleton--section"></div>
+                        <div class="adsum-skeleton adsum-skeleton--circle"></div>
+                        <div class="adsum-skeleton adsum-skeleton--button"></div>
+                    </div>
+
+                    <div class="adsum-screen-loader__card">
+                        <div class="adsum-skeleton adsum-skeleton--section"></div>
+                        <div class="adsum-skeleton adsum-skeleton--line"></div>
+                        <div class="adsum-skeleton adsum-skeleton--line"></div>
+                        <div class="adsum-skeleton adsum-skeleton--line short"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <section class="hero-section page-loaded">
+        <div class="hero-overlay"></div>
+        <div class="container hero-container">
+            <span class="badge-hero">Próxima Misión</span>
+            <h1 class="hero-title">Adsum <br /><span class="text-destacado">2026</span></h1>
+            <p class="hero-subtitle">Preparando el corazón para el envío. Caminamos juntos hacia un nuevo destino de servicio y fe.</p>
+        </div>
+    </section>
+
+    <section class="section relative overflow-hidden page-loaded">
+        @if (!PuebloRevelado)
+        {
+            <div class="blur-map-container"><div class="fake-map"></div></div>
+            <div class="container">
+                <div class="countdown-card">
+                    <span class="pill-red">Misterio</span>
+                    <h2>Próximo destino...</h2>
+                    <div class="countdown-grid">
+                        <div class="time-block"><span class="time-val">@TiempoRestante.Days</span><span class="time-lab">días</span></div>
+                        <span class="time-sep">:</span>
+                        <div class="time-block"><span class="time-val">@TiempoRestante.Hours</span><span class="time-lab">hs</span></div>
+                        <span class="time-sep">:</span>
+                        <div class="time-block"><span class="time-val">@TiempoRestante.Minutes</span><span class="time-lab">min</span></div>
+                        <span class="time-sep">:</span>
+                        <div class="time-block"><span class="time-val">@TiempoRestante.Seconds</span><span class="time-lab">seg</span></div>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="container">
+                <div class="destination-grid">
+                    <div class="dest-info">
+                        <span class="overline">Rumbo a...</span>
+                        <h2 class="section-title">@pueblo?.Nombre</h2>
+
+                        @if (!string.IsNullOrWhiteSpace(pueblo?.Provincia) || !string.IsNullOrWhiteSpace(pueblo?.Pais))
+                        {
+                            <p class="section-desc pueblo-meta">
+                                @pueblo?.Provincia, @pueblo?.Pais
+                            </p>
+                        }
+
+                        <p class="history-text">@pueblo?.Historia</p>
+
+                        @if (!string.IsNullOrWhiteSpace(pueblo?.Parroquia) || !string.IsNullOrWhiteSpace(pueblo?.FechaMision))
+                        {
+                            <div class="community-box">
+                                @if (!string.IsNullOrWhiteSpace(pueblo?.Parroquia))
+                                {
+                                    <h4>Parroquia</h4>
+                                    <p>@pueblo.Parroquia</p>
+                                }
+
+                                @if (!string.IsNullOrWhiteSpace(pueblo?.FechaMision))
+                                {
+                                    <h4>Fecha de misión</h4>
+                                    <p>@pueblo.FechaMision</p>
+                                }
+                            </div>
+                        }
+
+                        @if (pueblo?.Actividades != null && pueblo.Actividades.Any())
+                        {
+                            <div class="activities-mini-grid">
+                                @foreach (var act in pueblo.Actividades)
+                                {
+                                    <div class="act-mini-card">
+                                        <span class="material-icons">@act.Icono</span>
+                                        <div>
+                                            <strong>@act.Titulo</strong>
+                                            <p>@act.Descripcion</p>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+
+                    <div class="dest-map">
+                        @if (!string.IsNullOrWhiteSpace(pueblo?.MapaEmbedUrl))
+                        {
+                            <div class="map-frame">
+                                <iframe src="@pueblo.MapaEmbedUrl" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                @if (pueblo?.Cronograma != null && pueblo.Cronograma.Any())
+                {
+                    <div class="cronograma-box mt-4">
+                        <h4>Cronograma de la misión</h4>
+                        <div class="cronograma-list">
+                            @foreach (var dia in pueblo.Cronograma)
+                            {
+                                <div class="crono-dia-card">
+                                    <div class="crono-dia-header">
+                                        <div>
+                                            <div class="crono-dia-nombre">@dia.Dia</div>
+                                            @if (!string.IsNullOrWhiteSpace(dia.Titulo))
+                                            {
+                                                <div class="crono-dia-titulo">@dia.Titulo</div>
+                                            }
+                                        </div>
+                                    </div>
+
+                                    <div class="crono-table">
+                                        @if (dia.Actividades != null && dia.Actividades.Any())
+                                        {
+                                            @foreach (var slot in dia.Actividades)
+                                            {
+                                                <div class="crono-item">
+                                                    <span class="crono-hora">@slot.Hora</span>
+                                                    <span class="crono-dot"></span>
+                                                    <span class="crono-desc">@slot.Descripcion</span>
+                                                </div>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <div class="crono-item">
+                                                <span class="crono-desc">Sin actividades cargadas.</span>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </section>
+
+    <section class="section bg-white page-loaded">
+        <div class="container text-center">
+            <div class="section-header">
+                <h2 class="section-title">Capital de Gracias</h2>
+            </div>
+
+            <div class="capitalario-layout">
+                @if (VecesCompletado > 0)
+                {
+                    <div class="completado-badge fade-in">
+                        <span class="material-icons">workspace_premium</span>
+                        <div class="badge-text">
+                            <strong>@VecesCompletado</strong>
+                            <span>Completados</span>
+                        </div>
+                    </div>
+                }
+
+                <div class="logo-dynamic-container">
+                    <img src="img/LogoColorAdsum.png" class="logo-underlay" />
+                    <div class="logo-fill-overlay @(IsResetting ? "reset-anim" : "")" style="height: @PorcentajeCapitalario%;">
+                        <img src="img/LogoColorAdsum.png" class="logo-colored" />
+                    </div>
+                </div>
+
+                <div class="capitalario-actions">
+                    <h3 class="total-count">@TotalAportesCapitalario</h3>
+                    @* BOTÓN PROTEGIDO CONTRA CLICKS DURANTE CARGA *@
+                    <button class="btn-custom btn-ambar btn-lg" 
+                            @onclick="SumarAporteCapitalario" 
+                            disabled="@(Cargando || EnviandoAporte || IsResetting)">
+                        Ofrecer mi Capital
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section bg-light page-loaded">
+        <div class="container">
+            <div class="section-header text-center">
+                <h2 class="section-title">Reflexiones</h2>
+                <p class="section-desc">Material para preparar el corazón.</p>
+            </div>
+
+            <div class="reflexiones-wall">
+                @if (reflexiones.Any())
+                {
+                    @foreach (var r in reflexiones)
+                    {
+                        var pdfUrl = GetSafePdfUrl(r.PdfUrl);
+                        var tienePdf = !string.IsNullOrWhiteSpace(pdfUrl);
+
+                        <div class="ref-item-card">
+                            <div class="ref-card-header">
+                                <div class="ref-avatar">
+                                    <span class="material-icons">menu_book</span>
+                                </div>
+
+                                <div class="ref-meta">
+                                    <span class="ref-author-name">@r.Autor</span>
+                                    <span class="ref-date">@r.Fecha.ToString("dd/MM/yyyy")</span>
+                                </div>
+                            </div>
+
+                            <div class="ref-card-body">
+                                <h3>@r.Titulo</h3>
+                                <p>@r.Contenido</p>
+                                   
+                                @if (tienePdf)
+                                {
+                                    <div class="ref-pdf-card">
+                                        <div class="ref-pdf-card__inner">
+                                            <div class="ref-pdf-card__left">
+                                                <div class="ref-pdf-icon">
+                                                    <span class="material-icons">picture_as_pdf</span>
+                                                </div>
+
+                                                <div class="ref-pdf-info">
+                                                    <div class="ref-pdf-title">Material en PDF disponible</div>
+                                                    <div class="ref-pdf-subtitle">
+                                                        Abrilo en el visor o en otra pestaña para verlo completo.
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="ref-pdf-actions">
+                                                <button class="btn-pdf-action btn-pdf-primary"
+                                                        @onclick="async () => await AbrirReflexion(r)">
+                                                    <span class="material-icons">visibility</span>
+                                                    Ver PDF
+                                                </button>
+
+                                                <a href="@pdfUrl"
+                                                   target="_blank"
+                                                   rel="noopener noreferrer"
+                                                   class="btn-pdf-action btn-pdf-secondary">
+                                                     <span class="material-icons">open_in_new</span>
+                                                     Abrir aparte
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+
+                            <div class="ref-card-footer">
+                                <button class="btn-read-more" @onclick="async () => await AbrirReflexion(r)">
+                                    <span class="material-icons">auto_stories</span>
+                                    @(tienePdf ? "Leer / ver reflexión" : "Leer completa")
+                                </button>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p class="text-center">No hay reflexiones cargadas todavía.</p>
+                }
+            </div>
+        </div>
+    </section>
+
+    <section class="section foro-section-wrap page-loaded" id="foro-section">
+        <div class="container">
+            <div class="section-header text-center foro-section-header">
+                <span class="foro-kicker">Comunidad en oración</span>
+                <h2 class="section-title">Foro de intenciones</h2>
+                <p class="section-desc foro-section-desc">
+                    Dejá tu intención para que toda la comunidad de Adsum Pater pueda acompañarte con su oración.
+                    Cada pedido compartido es una oportunidad para rezar juntos.
+                </p>
+            </div>
+
+            <div class="foro-layout">
+                <div class="foro-form-card">
+                    <div class="foro-card-top">
+                        <div class="foro-icon-box">
+                            <span class="material-icons">edit_note</span>
+                        </div>
+                        <div>
+                            <h3>Dejá tu intención</h3>
+                            <p>Podés escribir una intención personal, familiar o comunitaria.</p>
+                        </div>
+                    </div>
+
+                    <div class="foro-form-fields">
+                        <label class="anon-toggle mt-3" style="display:flex;align-items:center;gap:.6rem;">
+                            <input type="checkbox" @bind="EnviarComoAnonimo" />
+                            <span>Publicar como anónimo</span>
+                        </label>
+
+                        @if (!EnviarComoAnonimo)
+                        {
+                            <input @bind="nuevaIntencion.Nombre"
+                                   @bind:event="oninput"
+                                   placeholder="Tu nombre"
+                                   class="form-control mt-3 @(MostrarErroresFormulario && string.IsNullOrWhiteSpace(nuevaIntencion.Nombre) ? "input-error" : "")" />
+
+                            @if (MostrarErroresFormulario && string.IsNullOrWhiteSpace(nuevaIntencion.Nombre))
+                            {
+                                <span class="field-error">Ingresá tu nombre o marcá “Publicar como anónimo”.</span>
+                            }
+                        }
+                        else
+                        {
+                            <div class="form-control mt-3" style="display:flex;align-items:center;gap:.5rem;background:#f7f7f7;">
+                                <span class="material-icons">visibility_off</span>
+                                <span>Tu intención se publicará como <strong>Anónimo</strong></span>
+                            </div>
+                        }
+
+                        <textarea @bind="nuevaIntencion.Texto"
+                                  @bind:event="oninput"
+                                  placeholder="Escribí tu intención..."
+                                  class="form-control mt-3 @(MostrarErroresFormulario && string.IsNullOrWhiteSpace(nuevaIntencion.Texto) ? "input-error" : "")"
+                                  rows="4"></textarea>
+
+                        @if (MostrarErroresFormulario && string.IsNullOrWhiteSpace(nuevaIntencion.Texto))
+                        {
+                            <span class="field-error">La intención no puede estar vacía.</span>
+                        }
+
+                        <button class="btn-custom btn-rojo btn-block mt-3 foro-submit-btn"
+                                @onclick="EnviarIntencion"
+                                disabled="@EnviandoIntencion">
+                            <span class="material-icons">
+                                @(EnviandoIntencion ? "hourglass_top" : "send")
+                            </span>
+                            @(EnviandoIntencion ? "Enviando..." : "Enviar intención")
+                        </button>
+                    </div>
+                </div>
+
+                <div class="foro-wall">
+                    <div class="foro-wall-head">
+                        <div class="foro-wall-title-wrap">
+                            <div class="foro-icon-box secondary">
+                                <span class="material-icons">favorite</span>
+                            </div>
+                            <div>
+                                <h3>Intenciones de la comunidad</h3>
+                                <p>@intenciones.Count intención@(intenciones.Count == 1 ? "" : "es") para acompañar con la oración</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="wall-scroll">
+                        @if (intenciones.Any())
+                        {
+                            @foreach (var i in intenciones)
+                            {
+                                <div class="prayer-bubble">
+                                    <div class="prayer-bubble-head">
+                                        <div class="prayer-avatar">
+                                            @ObtenerInicialIntencion(i)
+                                        </div>
+
+                                        <div class="prayer-meta">
+                                            <strong>@ObtenerNombreVisibleIntencion(i)</strong>
+                                            <span>Intención compartida</span>
+                                        </div>
+                                    </div>
+
+                                    <p>@i.Texto</p>
+
+                                    <div class="prayer-actions">
+                                        <button class="btn-rezar @(YaRecePor(i) ? "active" : "")"
+                                                @onclick="() => RezarPor(i)"
+                                                disabled="@YaRecePor(i)">
+                                            <span class="material-icons">favorite</span>
+                                            @(YaRecePor(i) ? $"Ya recé · {i.Rezos}" : $"Rezar · {i.Rezos}")
+                                        </button>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="foro-empty-state">
+                                <span class="material-icons">forum</span>
+                                <h4>Todavía no hay intenciones aprobadas</h4>
+                                <p>Podés ser el primero en dejar una intención para que recemos juntos.</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+}
+
+@if (reflexionSeleccionada != null)
+{
+    <div class="modal-backdrop" @onclick="CerrarReflexion">
+        <div class="modal-lectura" @onclick:stopPropagation="true">
+            <button class="btn-close-modal" @onclick="CerrarReflexion">×</button>
+
+            <div class="modal-lectura-head">
+                <h3>@reflexionSeleccionada.Titulo</h3>
+                <div class="modal-lectura-sub">
+                    @reflexionSeleccionada.Autor · @reflexionSeleccionada.Fecha.ToString("dd/MM/yyyy")
+                </div>
+            </div>
+
+            <div class="modal-lectura-body">
+                @if (!string.IsNullOrEmpty(pdfModalUrl))
+                {
+                    <div class="pdf-mobile-fallback">
+                        <div class="pdf-toolbar">
+                            <div class="pdf-toolbar-info">
+                                Si el visor no carga en tu dispositivo, podés abrir el archivo en otra pestaña.
+                            </div>
+
+                            <div class="pdf-toolbar-actions">
+                                <a href="@pdfModalUrl"
+                                   target="_blank"
+                                   rel="noopener noreferrer"
+                                   class="btn-pdf-action btn-pdf-secondary">
+                                     <span class="material-icons">open_in_new</span>
+                                     Abrir aparte
+                                </a>
+                            </div>
+                        </div>
+
+                        <iframe src="@pdfModalUrl"
+                                class="pdf-iframe"
+                                title="@reflexionSeleccionada.Titulo"
+                                loading="lazy">
+                        </iframe>
+                    </div>
+                }
+                else
+                {
+                    <p class="modal-lectura-text">@reflexionSeleccionada.Contenido</p>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+@if (MostrarToast)
+{
+    <div class="sonner-toast-host">
+        <div class="sonner-toast sonner-toast--@ToastTipo @(ToastSaliendo ? "toast-out" : "toast-in")">
+            <div class="sonner-toast__icon">
+                <span class="material-icons">@ToastIcono</span>
+            </div>
+
+            <div class="sonner-toast__content">
+                <strong>@ToastTitulo</strong>
+                <p>@ToastMensaje</p>
+            </div>
+
+            <button class="sonner-toast__close" @onclick="OcultarToast">
+                <span class="material-icons">close</span>
+            </button>
+        </div>
+    </div>
+}
+@code {
+    private bool Cargando = true;
+    private PuebloViewModel? pueblo;
+    private List<Reflexion> reflexiones = new();
+    private Reflexion? reflexionSeleccionada;
+    private string pdfModalUrl = "";
+    private bool EnviandoIntencion = false;
+    private bool MostrarErroresFormulario = false;
+    private bool EnviarComoAnonimo = false;
+
+    private bool MostrarToast = false;
+    private bool ToastSaliendo = false;
+    private string ToastTitulo = "";
+    private string ToastMensaje = "";
+    private string ToastTipo = "success";
+    private string ToastIcono = "check_circle";
+
+    private CancellationTokenSource? _toastCts;
+
+    public class IntencionItem : Intencion
+    {
+        public string FirebaseId { get; set; } = "";
+    }
+
+    private List<IntencionItem> intenciones = new();
+
+    private int TotalAportesCapitalario = 0;
+    private int VecesCompletado = 0;
+    private int MetaCapitalario = 500;
+    private bool IsResetting = false;
+    private double PorcentajeCapitalario => Math.Min(100, (TotalAportesCapitalario * 100.0) / (MetaCapitalario <= 0 ? 500 : MetaCapitalario));
+    private bool EnviandoAporte = false;
+
+    private DateTimeOffset FechaRevelacion;
+    private TimeSpan TiempoRestante;
+    private bool PuebloRevelado = false;
+
+    private System.Timers.Timer? _timerReloj;
+    private System.Timers.Timer? _timerCapitalario;
+    private System.Timers.Timer? _timerForo;
+    private System.Timers.Timer? _timerLoading;
+
+    private DateTime _ultimoAporteCapitalarioUtc = DateTime.MinValue;
+    private readonly TimeSpan _cooldownRefrescoCapitalario = TimeSpan.FromSeconds(8);
+
+    private Intencion nuevaIntencion = new();
+    private HashSet<string> RezosLocales = new();
+
+    private readonly List<string> LoadingMessages = new()
+    {
+        "Conectando con la misión y trayendo los datos desde la base...",
+        "Preparando reflexiones, capital de gracias e intenciones de la comunidad...",
+        "Acomodando cada detalle para que el camino esté listo...",
+        "Ya casi está todo preparado."
+    };
+
+    private int LoadingMessageIndex = 0;
+    private string LoadingMessage => LoadingMessages[LoadingMessageIndex];
+
+    protected override async Task OnInitializedAsync()
+    {
+        IniciarAnimacionLoading();
+
+        await CargarDatosIniciales();
+        await CargarCapitalario(cacheSegundos: 0, forzarUi: true);
+        await CargarForo(cacheSegundos: 0);
+
+        Cargando = false;
+        DetenerAnimacionLoading();
+
+        _timerReloj = new System.Timers.Timer(1000);
+        _timerReloj.Elapsed += (s, e) => InvokeAsync(ActualizarReloj);
+        _timerReloj.Start();
+        
+        _timerForo = new System.Timers.Timer(300000);
+        _timerForo.Elapsed += async (s, e) =>
+        {
+            if (!EnviandoIntencion)
+                await InvokeAsync(() => CargarForo(cacheSegundos: 0));
+        };
+        _timerForo.Start();
+    }
+
+    private void IniciarAnimacionLoading()
+    {
+        _timerLoading = new System.Timers.Timer(1800);
+        _timerLoading.Elapsed += (s, e) =>
+        {
+            LoadingMessageIndex = (LoadingMessageIndex + 1) % LoadingMessages.Count;
+            InvokeAsync(StateHasChanged);
+        };
+        _timerLoading.Start();
+    }
+
+    private void DetenerAnimacionLoading()
+    {
+        _timerLoading?.Stop();
+        _timerLoading?.Dispose();
+        _timerLoading = null;
+    }
+
+    private async Task CargarDatosIniciales()
+    {
+        try
+        {
+            var p = await Firebase.ObtenerObjeto<PuebloViewModel>("pueblo", cacheSegundos: 1800);
+            if (p != null)
+            {
+                pueblo = p;
+                FechaRevelacion = p.FechaRevelacion;
+            }
+
+            var dRef = await Firebase.ObtenerDiccionario<Reflexion>("reflexiones", cacheSegundos: 1800);
+            reflexiones = dRef?.Values?.OrderByDescending(x => x.Fecha).ToList() ?? new List<Reflexion>();
+
+            StateHasChanged();
+        }
+        catch
+        {
+        }
+    }
+
+  private async Task CargarCapitalario(int cacheSegundos = 0, bool forzarUi = true)
+{
+    try
+    {
+        var total = await Firebase.ObtenerObjeto<int>("capitalario/total", 0);
+        var completados = await Firebase.ObtenerObjeto<int>("capitalario/completados", 0);
+        var meta = await Firebase.ObtenerObjeto<int?>("capitalario/meta", 0);
+
+        TotalAportesCapitalario = total;
+        VecesCompletado = completados;
+
+        if (meta.HasValue && meta.Value > 0)
+            MetaCapitalario = meta.Value;
+
+        if (forzarUi)
+            StateHasChanged();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Error cargando capitalario: {ex.Message}");
+    }
+}
+
+    private async Task CargarForo(int cacheSegundos = 0)
+{
+    try
+    {
+        var dInt = await Firebase.ObtenerDiccionario<Intencion>("intenciones_publicadas", 0);
+
+        intenciones = dInt?
+            .Select(kvp => new IntencionItem
+            {
+                FirebaseId = kvp.Key,
+                Nombre = string.IsNullOrWhiteSpace(kvp.Value.Nombre) ? "Anónimo" : kvp.Value.Nombre,
+                Texto = kvp.Value.Texto,
+                Rezos = kvp.Value.Rezos,
+                Fecha = kvp.Value.Fecha
+            })
+            .OrderByDescending(x => x.Fecha)
+            .Take(20)
+            .ToList() ?? new List<IntencionItem>();
+
+        StateHasChanged();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Error cargando foro: {ex.Message}");
+    }
+}
+
+    private async Task SumarAporteCapitalario()
+{
+    if (Cargando || EnviandoAporte || IsResetting)
+        return;
+
+    EnviandoAporte = true;
+
+    try
+    {
+        var totalActual = await Firebase.ObtenerObjeto<int>("capitalario/total", 0);
+        var completadosActual = await Firebase.ObtenerObjeto<int>("capitalario/completados", 0);
+
+        var nuevoTotal = totalActual + 1;
+
+        if (nuevoTotal >= MetaCapitalario && MetaCapitalario > 0)
+        {
+            await Firebase.GuardarObjeto("capitalario/total", 0);
+            await Firebase.GuardarObjeto("capitalario/completados", completadosActual + 1);
+
+            TotalAportesCapitalario = 0;
+            VecesCompletado = completadosActual + 1;
+        }
+        else
+        {
+            await Firebase.GuardarObjeto("capitalario/total", nuevoTotal);
+            TotalAportesCapitalario = nuevoTotal;
+            VecesCompletado = completadosActual;
+        }
+
+        StateHasChanged();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Error al sumar aporte: {ex.Message}");
+    }
+    finally
+    {
+        EnviandoAporte = false;
+    }
+}
+
+    private bool YaRecePor(IntencionItem i) => RezosLocales.Contains(i.FirebaseId);
+
+    private async Task RezarPor(IntencionItem i)
+{
+    if (YaRecePor(i))
+        return;
+
+    try
+    {
+        var actual = await Firebase.ObtenerObjeto<int>($"intenciones_publicadas/{i.FirebaseId}/rezos", 0);
+        var nuevoValor = actual + 1;
+
+        RezosLocales.Add(i.FirebaseId);
+        i.Rezos = nuevoValor;
+        StateHasChanged();
+
+        await Firebase.GuardarObjeto($"intenciones_publicadas/{i.FirebaseId}/rezos", nuevoValor);
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Error al rezar por intención: {ex.Message}");
+        RezosLocales.Remove(i.FirebaseId);
+        await CargarForo(0);
+    }
+}
+
+    private void ActualizarReloj()
+    {
+        TiempoRestante = FechaRevelacion - DateTimeOffset.Now;
+        PuebloRevelado = TiempoRestante.TotalSeconds <= 0;
+
+        if (PuebloRevelado)
+            TiempoRestante = TimeSpan.Zero;
+
+        StateHasChanged();
+    }
+
+    private async Task EnviarIntencion()
+    {
+        if (EnviandoIntencion)
+            return;
+
+        MostrarErroresFormulario = true;
+
+        if (!EnviarComoAnonimo && string.IsNullOrWhiteSpace(nuevaIntencion.Nombre))
+        {
+            await MostrarToastAsync("Falta tu nombre", "Ingresá tu nombre o marcá la opción para publicar como anónimo.", "error", "error");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(nuevaIntencion.Texto))
+        {
+            await MostrarToastAsync("Intención vacía", "Escribí una intención antes de enviarla.", "error", "error");
+            return;
+        }
+
+        try
+        {
+            EnviandoIntencion = true;
+            await MostrarToastAsync("Enviando intención", "Estamos cargando tu intención...", "loading", "progress_activity", autoClose: false);
+
+            var nueva = new Intencion
+            {
+                Nombre = EnviarComoAnonimo ? "Anónimo" : (nuevaIntencion.Nombre?.Trim() ?? ""),
+                Texto = nuevaIntencion.Texto.Trim(),
+                Fecha = DateTimeOffset.Now,
+                Rezos = 0
+            };
+
+            await Firebase.Agregar("intenciones_pendientes", nueva);
+
+            nuevaIntencion = new();
+            EnviarComoAnonimo = false;
+            MostrarErroresFormulario = false;
+
+            await MostrarToastAsync("Intención enviada", "Tu intención quedó cargada y está a la espera de aprobación.", "success", "check_circle");
+        }
+        catch
+        {
+            await MostrarToastAsync("No se pudo enviar", "Ocurrió un problema al cargar la intención. Intentá nuevamente.", "error", "error");
+        }
+        finally
+        {
+            EnviandoIntencion = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private string ObtenerNombreVisibleIntencion(IntencionItem i) =>
+        string.IsNullOrWhiteSpace(i.Nombre) ? "Anónimo" : i.Nombre.Trim();
+
+    private string ObtenerInicialIntencion(IntencionItem i)
+    {
+        var nombre = ObtenerNombreVisibleIntencion(i);
+        return string.IsNullOrWhiteSpace(nombre) ? "A" : nombre.Substring(0, 1).ToUpper();
+    }
+
+    private Task AbrirReflexion(Reflexion r)
+    {
+        reflexionSeleccionada = r;
+        pdfModalUrl = GetSafePdfUrl(r.PdfUrl);
+        return Task.CompletedTask;
+    }
+
+    private void CerrarReflexion()
+    {
+        reflexionSeleccionada = null;
+        pdfModalUrl = "";
+    }
+
+    private async Task IrAlForo() => await JS.InvokeVoidAsync("scrollToElement", "foro-section");
+
+    public void Dispose()
+    {
+        _timerReloj?.Stop();
+        _timerReloj?.Dispose();
+
+        _timerCapitalario?.Stop();
+        _timerCapitalario?.Dispose();
+
+        _timerForo?.Stop();
+        _timerForo?.Dispose();
+
+        _timerLoading?.Stop();
+        _timerLoading?.Dispose();
+
+        _toastCts?.Cancel();
+        _toastCts?.Dispose();
+    }
+
+    private async Task MostrarToastAsync(string titulo, string mensaje, string tipo = "success", string icono = "check_circle", bool autoClose = true, int duration = 3200)
+    {
+        _toastCts?.Cancel();
+        _toastCts?.Dispose();
+        _toastCts = new CancellationTokenSource();
+
+        ToastTitulo = titulo;
+        ToastMensaje = mensaje;
+        ToastTipo = tipo;
+        ToastIcono = icono;
+        ToastSaliendo = false;
+        MostrarToast = true;
+
+        await InvokeAsync(StateHasChanged);
+
+        if (!autoClose)
+            return;
+
+        try
+        {
+            await Task.Delay(duration, _toastCts.Token);
+
+            if (!_toastCts.Token.IsCancellationRequested)
+                await OcultarToast();
+        }
+        catch (TaskCanceledException)
+        {
+        }
+    }
+
+    private async Task OcultarToast()
+    {
+        if (!MostrarToast)
+            return;
+
+        ToastSaliendo = true;
+        await InvokeAsync(StateHasChanged);
+
+        await Task.Delay(220);
+
+        MostrarToast = false;
+        ToastSaliendo = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private string GetSafePdfUrl(string? rawUrl)
+    {
+        if (string.IsNullOrWhiteSpace(rawUrl))
+            return "";
+
+        var url = rawUrl.Trim().Replace("\\", "/");
+
+        if (url.StartsWith("data:application/pdf", StringComparison.OrdinalIgnoreCase))
+            return "";
+
+        if (url.StartsWith("file:///", StringComparison.OrdinalIgnoreCase))
+            url = url.Replace("file:///", "/");
+
+        if (Uri.TryCreate(url, UriKind.Absolute, out var absoluta))
+        {
+            if (absoluta.Scheme == Uri.UriSchemeHttp || absoluta.Scheme == Uri.UriSchemeHttps)
+                return absoluta.ToString();
+        }
+
+        url = url.TrimStart('~');
+
+        if (!url.StartsWith("/"))
+            url = "/" + url;
+
+        return NavManager.ToAbsoluteUri(url).ToString();
+    }
+}

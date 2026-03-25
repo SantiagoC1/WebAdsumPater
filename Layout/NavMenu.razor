@@ -1,0 +1,101 @@
+@implements IDisposable
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JS
+
+<header id="mainNav" class="topbar @(IsNavHidden ? "nav-hidden" : "")">
+    <div class="container-xl topbar-inner nav-container">
+        <a class="brand" href="">
+            <img src="img/LogoAdsum-Claro.png" alt="Adsum Pater" />
+            <div class="brand-text">
+                <div class="brand-title">Adsum Pater</div>
+                <div class="brand-sub">Misión universitaria · Schoenstatt</div>
+            </div>
+        </a>
+
+        <button class="nav-toggle @(isMenuOpen ? "open" : "")"
+                @onclick="ToggleNavMenu"
+                aria-label="Abrir menú">
+            <span class="hamburger"></span>
+        </button>
+
+        <nav class="nav @(isMenuOpen ? "open" : "")">
+            <NavLink class="nav-link" href="identidad" @onclick="CloseNav">Identidad</NavLink>
+            <NavLink class="nav-link" href="adsum-2026" @onclick="CloseNav">Adsum 2026</NavLink>
+            <NavLink class="nav-link" href="penia" @onclick="CloseNav">La Herencia</NavLink>
+            <NavLink class="nav-link" href="contacto" @onclick="CloseNav">Contacto</NavLink>
+            <NavLink class="cta" href="colaborar" @onclick="CloseNav">Colaborar</NavLink>
+        </nav>
+    </div>
+</header>
+
+@if (isMenuOpen)
+{
+    <div class="nav-overlay" @onclick="CloseNav"></div>
+}
+
+@code {
+    private bool isMenuOpen = false;
+    private bool IsNavHidden = true;
+    private DotNetObjectReference<NavMenu>? _objRef;
+
+    protected override void OnInitialized()
+    {
+        NavigationManager.LocationChanged += OnLocationChanged;
+        CheckInitialRoute();
+    }
+
+    private void CheckInitialRoute()
+    {
+        var relative = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        IsNavHidden = string.IsNullOrWhiteSpace(relative);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _objRef = DotNetObjectReference.Create(this);
+            await JS.InvokeVoidAsync("adsumNav.registerScroll", _objRef);
+        }
+    }
+
+    private void ToggleNavMenu() => isMenuOpen = !isMenuOpen;
+    private void CloseNav() => isMenuOpen = false;
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        CheckInitialRoute();
+        isMenuOpen = false;
+        StateHasChanged();
+    }
+
+    [JSInvokable("OnScroll")]
+    public void OnScroll(double scrollY)
+    {
+        var relative = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        bool isHome = string.IsNullOrWhiteSpace(relative);
+
+        if (!isHome)
+        {
+            if (IsNavHidden)
+            {
+                IsNavHidden = false;
+                StateHasChanged();
+            }
+            return;
+        }
+
+        bool shouldHide = scrollY <= 60;
+        if (shouldHide != IsNavHidden)
+        {
+            IsNavHidden = shouldHide;
+            StateHasChanged();
+        }
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+        _objRef?.Dispose();
+    }
+}

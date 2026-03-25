@@ -1,0 +1,55 @@
+﻿@inherits LayoutComponentBase
+@using AdsumPater.Layout 
+
+<div class="site">
+    <NavMenu />
+
+    <main class="main">
+        @Body
+    </main>
+
+    <footer class="footer2">
+        <div class="container-xl footer2-inner">
+            <div class="footer2-brand">
+                <img src="img/LogoAdsum-Claro.png" alt="Adsum Pater" />
+                <div class="brand-text-footer">
+                    <div class="footer2-title">Adsum Pater</div>
+                    <div class="footer2-sub">Misión universitaria · Schoenstatt</div>
+                </div>
+            </div>
+
+            <div class="footer2-cols">
+                <div class="footer2-col">
+                    <div class="footer2-coltitle">Explorar</div>
+                    <a href="identidad">Identidad</a>
+                    <a href="adsum-2026">Adsum 2026</a>
+                    <a href="penia">La Herencia</a>
+                </div>
+
+                <div class="footer2-col">
+                    <div class="footer2-coltitle">Participar</div>
+                    <a href="contacto">Contacto</a>
+                    <a href="colaborar">Colaborar</a>
+                    <a href="https://www.instagram.com/adsumpater/" target="_blank">Sumate</a>
+                </div>
+
+                <div class="footer2-col">
+                    <div class="footer2-coltitle">Redes</div>
+                    <a href="https://www.instagram.com/adsumpater/" target="_blank">Instagram</a>
+                    <a href="mailto:adsumpater@gmail.com">Email</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer2-bottom">
+            <div class="container-xl footer2-bottom-inner">
+                <span>© @DateTime.Now.Year · Adsum Pater — “Aquí estoy, Padre”</span>
+                <span class="footer2-note">Hecho con amor</span>
+                <span>
+                  desarrollo por: 
+                  <a href="https://scdev.com.ar/" target="_blank" class="dev-link">SCdev</a>
+                </span>
+            </div>
+        </div>
+    </footer>
+</div>

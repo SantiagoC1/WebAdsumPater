@@ -1,0 +1,299 @@
+@page "/identidad"
+@using AdsumPater.Services
+@inject FirebaseService Firebase
+
+<PageTitle>Identidad - Adsum Pater</PageTitle>
+
+<section class="hero-section">
+    <div class="hero-overlay"></div>
+    <div class="container hero-container">
+        <span class="badge-hero">Nuestra Identidad</span>
+        <h1 class="hero-title">
+            Adsum Pater: <br />
+            <span class="text-destacado">"Aquí estoy, Padre"</span>
+        </h1>
+        <p class="hero-subtitle">
+            Más que una misión, nuestra manera de vivir la pascua. Caminando junto a las comunidades desde hace más de 20 años.
+        </p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="about-grid">
+            <div class="text-column">
+                <span class="overline">Quiénes Somos</span>
+                <h2 class="section-title">Una misión universitaria</h2>
+
+                <div class="text-content">
+                    <p>
+                        <strong>Adsum Pater</strong> es una misión de Semana Santa pensada para jóvenes universitarios que buscan vivir estos días de una manera distinta: más profunda, comunitaria y con sentido.
+                    </p>
+                    <p>
+                        Perteneciente al <strong>Movimiento de Schoenstatt de La Plata</strong>, la misión invita a detenerse, encontrarse con Cristo y salir al encuentro del otro, siempre de la mano de María.
+                    </p>
+                    <p>
+                        El nombre en latín significa <em>“Aquí estoy, Padre”</em>. Expresa animarse con disponibilidad y entrega.
+                    </p>
+                </div>
+            </div>
+
+            <div class="stats-column">
+                <div class="stat-card primary">
+                    <span class="big-number">20</span>
+                    <span class="stat-label">Años de Historia</span>
+                </div>
+                <div class="stats-row">
+                    <div class="stat-card small">
+                        <span class="mid-number">+100</span>
+                        <span class="stat-label">Jóvenes</span>
+                    </div>
+                    <div class="stat-card small">
+                        <span class="mid-number">4</span>
+                        <span class="stat-label">Días</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section bg-light">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">¿Qué hacemos en la misión?</h2>
+        </div>
+
+        <div class="activities-grid">
+            <article class="activity-card">
+                <div class="icon-circle amber">
+                    <span class="material-icons">handshake</span>
+                </div>
+                <h3>Misión Interna</h3>
+                <p>Vivimos la Semana Santa con una profunda espiritualidad, centrada en el carisma de Schoenstatt y la cercanía con el otro.</p>
+            </article>
+
+            <article class="activity-card">
+                <div class="icon-circle red">
+                    <span class="material-icons">door_front</span>
+                </div>
+                <h3>Casa por Casa</h3>
+                <p>Recorremos el pueblo visitando a las familias, llevando a la Virgen Peregrina. Con foco en la escucha, el acompañamiento y la cercanía humana.</p>
+            </article>
+
+            <article class="activity-card">
+                <div class="icon-circle amber">
+                    <span class="material-icons">volunteer_activism</span>
+                </div>
+                <h3>Apostolado</h3>
+                <p>Realizamos actividades en hospitales, geriátricos y centros comunitarios con propuestas recreativas, talleres y juegos para niños, jóvenes y adolescentes compartiendo la fe.</p>
+            </article>
+
+            <article class="activity-card">
+                <div class="icon-circle red">
+                    <span class="material-icons">escalator_warning</span>
+                </div>
+                <h3>Comunidad</h3>
+                <p>Compartimos las celebraciones litúrgicas con la comunidad, y nos despedimos con una peña para disfrutar de los talentos del pueblo, festejando la Pascua.</p>
+            </article>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="section-header">
+            <span class="badge-title">Nuestro Recorrido</span>
+            <h2 class="section-title">Línea Histórica</h2>
+            <p class="section-desc">Cada año volvemos a decir “Sí, Padre”. Tocá una edición para ver fotos y testimonios.</p>
+        </div>
+
+        @if (Cargando)
+        {
+            <div class="loading-state">
+                <div class="spinner"></div>
+                <p>Cargando historia...</p>
+            </div>
+        }
+        else
+        {
+            <div class="timeline-grid">
+                @foreach (var item in Ediciones.OrderByDescending(e => e.Anio))
+                {
+                    <article class="year-card" @onclick="() => OpenModal(item)">
+                        <div class="year-header">
+                            <span class="year-badge">@item.Anio</span>
+                            <h4 class="year-place" title="@GetLugar(item)">@GetLugar(item)</h4>
+                        </div>
+                        <span class="year-province">@item.Provincia</span>
+                        <p class="year-desc">@item.Descripcion</p>
+                        <div class="year-footer">
+                            <span class="btn-link">Ver detalles <span class="material-icons">arrow_forward</span></span>
+                        </div>
+                    </article>
+                }
+            </div>
+        }
+    </div>
+</section>
+
+@if (IsModalOpen && Selected is not null)
+{
+    <div class="modal-backdrop" @onclick="CloseModal">
+        <div class="modal-container" @onclick:stopPropagation="true">
+
+            <div class="modal-header">
+                <div class="modal-title-group">
+                    <span class="modal-year">@Selected.Anio</span>
+                    <div>
+                        <h3>@GetLugar(Selected)</h3>
+                        <span class="modal-subtitle">@Selected.Provincia</span>
+                    </div>
+                </div>
+                <button class="btn-close" @onclick="CloseModal">
+                    <span class="material-icons">close</span>
+                </button>
+            </div>
+
+            <div class="modal-content-grid">
+                <div class="modal-media">
+                    <div class="photo-viewer">
+                        <img src="@CurrentPhotoUrl" alt="Foto @GetLugar(Selected)" class="main-photo" />
+
+                        @if (Selected.Fotos?.Count > 1)
+                        {
+                            <div class="photo-controls">
+                                <button class="nav-btn prev" @onclick="PrevPhoto"><span class="material-icons">chevron_left</span></button>
+                                <span class="photo-counter">@(CurrentPhotoIndex + 1) / @Selected.Fotos.Count</span>
+                                <button class="nav-btn next" @onclick="NextPhoto"><span class="material-icons">chevron_right</span></button>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <div class="modal-details">
+                    <div class="detail-box">
+                        <h4>Resumen</h4>
+                        <p>@Selected.Descripcion</p>
+                    </div>
+
+                    <div class="detail-box">
+                        <h4>Datos Clave</h4>
+                        <ul class="data-list">
+                            <li><span class="material-icons icon">place</span> <strong>Ubicación:</strong> @Selected.Ubicacion</li>
+                            <li><span class="material-icons icon">church</span> <strong>Parroquia:</strong> @Selected.Parroquia</li>
+                            <li><span class="material-icons icon">lightbulb</span> <strong>Enfoque:</strong> @Selected.Enfoque</li>
+                        </ul>
+                    </div>
+
+                    @if (Selected.Testimonios != null && Selected.Testimonios.Any())
+                    {
+                        <div class="detail-box">
+                            <h4>Testimonios</h4>
+                            <div class="testimonials-list">
+                                @foreach (var t in Selected.Testimonios)
+                                {
+                                    <div class="testimonial-item">
+                                        <p>“@t.Texto”</p>
+                                        <small>— @t.Autor (@t.Rol)</small>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<EdicionViewModel> Ediciones = new();
+    private bool Cargando = true;
+    private bool IsModalOpen;
+    private EdicionViewModel? Selected;
+    private int CurrentPhotoIndex = 0;
+
+    public class TestimonioViewModel
+    {
+        public string Texto { get; set; } = "";
+        public string Autor { get; set; } = "";
+        public string Rol { get; set; } = "";
+    }
+
+    public class EdicionViewModel
+    {
+        public int Anio { get; set; }
+        public string Lugar { get; set; } = "";
+        public string Pueblo { get; set; } = "";
+        public string Provincia { get; set; } = "";
+        public string Descripcion { get; set; } = "";
+        public string Ubicacion { get; set; } = "";
+        public string Parroquia { get; set; } = "";
+        public string Enfoque { get; set; } = "";
+        public List<string> Fotos { get; set; } = new();
+        public List<TestimonioViewModel> Testimonios { get; set; } = new();
+    }
+
+    private string CurrentPhotoUrl
+    {
+        get
+        {
+            if (Selected?.Fotos != null && Selected.Fotos.Count > 0)
+            {
+                if (CurrentPhotoIndex >= Selected.Fotos.Count) CurrentPhotoIndex = 0;
+                if (CurrentPhotoIndex < 0) CurrentPhotoIndex = Selected.Fotos.Count - 1;
+                return Selected.Fotos[CurrentPhotoIndex];
+            }
+            return "https://images.unsplash.com/photo-1516967124798-10656f7dca28?q=80&w=1000";
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // Ponemos un caché largo (1 hora = 3600s) porque la historia 
+            // de misiones pasadas casi nunca cambia.
+            var historia = await Firebase.ObtenerDiccionario<EdicionViewModel>("historia", cacheSegundos: 3600);
+
+            if (historia == null || historia.Count == 0)
+            {
+                // Fallback a la línea histórica vieja si el nodo nuevo está vacío
+                var vieja = await Firebase.ObtenerDiccionario<EdicionViewModel>("lineaHistorica", cacheSegundos: 3600);
+                Ediciones = vieja?.Values.ToList() ?? new List<EdicionViewModel>();
+            }
+            else
+            {
+                Ediciones = historia.Values.ToList();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error cargando historia: " + ex.Message);
+        }
+        finally
+        {
+            Cargando = false;
+        }
+    }
+
+    private static string GetLugar(EdicionViewModel item) =>
+        !string.IsNullOrWhiteSpace(item.Lugar) ? item.Lugar : item.Pueblo;
+
+    private void OpenModal(EdicionViewModel item)
+    {
+        Selected = item;
+        CurrentPhotoIndex = 0;
+        IsModalOpen = true;
+    }
+
+    private void CloseModal()
+    {
+        IsModalOpen = false;
+        Selected = null;
+    }
+
+    private void NextPhoto() => CurrentPhotoIndex++;
+    private void PrevPhoto() => CurrentPhotoIndex--;
+}

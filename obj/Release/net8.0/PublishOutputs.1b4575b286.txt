@@ -1,0 +1,7 @@
+C:\Users\1cace\Desktop\SCDEV\ADSUM\AdsumPater\AdsumPater\bin\Release\net8.0\publish\release\web.config
+C:\Users\1cace\Desktop\SCDEV\ADSUM\AdsumPater\AdsumPater\bin\Release\net8.0\publish\firebase.json
+C:\Users\1cace\Desktop\SCDEV\ADSUM\AdsumPater\AdsumPater\bin\Release\net8.0\publish\release\firebase.json
+C:\Users\1cace\Desktop\SCDEV\ADSUM\AdsumPater\AdsumPater\bin\Release\net8.0\publish\release\wwwroot\appsettings.json
+C:\Users\1cace\Desktop\SCDEV\ADSUM\AdsumPater\AdsumPater\bin\Release\net8.0\publish\release\wwwroot\sample-data\weather.json
+C:\Users\1cace\Desktop\SCDEV\ADSUM\AdsumPater\AdsumPater\bin\Release\net8.0\publish\release\wwwroot\_framework\blazor.boot.json
+C:\Users\1cace\Desktop\SCDEV\ADSUM\AdsumPater\AdsumPater\bin\Release\net8.0\publish\web.config

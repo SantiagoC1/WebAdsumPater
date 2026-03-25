@@ -1,0 +1,2 @@
+C:\Users\Santi\Desktop\AdsumPaterWasm\AdsumPater\release\firebase.json
+C:\Users\Santi\Desktop\AdsumPaterWasm\AdsumPater\release\web.config
