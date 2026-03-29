@@ -33,11 +33,11 @@
       "url": "_framework\/icudt_no_CJK.dat"
     },
     {
-      "hash": "sha256-TrZ7porFF\/\/TW47yNw7tMtvnL2X9NzgZH9GshgUJSvc=",
+      "hash": "sha256-EDcnrj1tCvC0CpHwmPqdTegk6C7fYWKCxsRlvFVeC18=",
       "url": "_framework\/blazor.boot.json"
     },
     {
-      "hash": "sha256-fREpBDCzdixLN2Zf7YBjKgFgTTtzUtKsWijhhbwjsyU=",
+      "hash": "sha256-5G81XJ0R\/V6paVHLDOhl+pFGhpW4KpPfgOL23Kq4IA0=",
       "url": "_framework\/AdsumPater.wasm"
     },
     {
@@ -441,7 +441,7 @@
       "url": "img\/sp9.png"
     },
     {
-      "hash": "sha256-GvfeUTQBvGtkXyXAJKxBEYD6xfUHVZoTdmfUsyK0d34=",
+      "hash": "sha256-AIb+hzztb0yoDfhuorfBj9TQHJE87h3kGbqNG4x3jjw=",
       "url": "index.html"
     },
     {
@@ -469,9 +469,13 @@
       "url": "pdfs\/Semana5.pdf"
     },
     {
+      "hash": "sha256-TOue1BcxgNEmoQbD4s8ncsEYi3rfBW7Rox7RmUCwDmE=",
+      "url": "pdfs\/SemanaSanta.pdf"
+    },
+    {
       "hash": "sha256-enKgCMkYmCpfEcmg6Annbmc40VZ\/A6aYYSQjZfVn2cU=",
       "url": "sample-data\/weather.json"
     }
   ],
-  "version": "qocu9G3A"
+  "version": "qmq3WiLN"
 };

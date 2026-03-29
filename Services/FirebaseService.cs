@@ -35,21 +35,31 @@ namespace AdsumPater.Services
 
         // --- MODIFICADO: Ahora es async y maneja el token de auth ---
         private async Task<string> ArmarUrl(string ruta, bool requiereAuth = false)
-        {
-            ruta = ruta.Trim('/');
-            var url = $"{_baseUrl}{ruta}.json";
+{
+    ruta = ruta.Trim('/');
+    var url = $"{_baseUrl}{ruta}.json";
 
-            if (requiereAuth)
+    if (requiereAuth)
+    {
+        try 
+        {
+            // Intentamos obtenerlo. Si tu LocalStorageService usa GetItemAsync<T>, 
+            // a veces falla si el valor guardado por JS no tiene comillas de JSON.
+            var token = await _localStorage.GetItemAsync<string>("firebaseToken");
+            
+            if (!string.IsNullOrEmpty(token))
             {
-                // El nombre "firebaseToken" debe coincidir con el que guardas en el JS del index.html
-                var token = await _localStorage.GetItemAsync<string>("firebaseToken");
-                if (!string.IsNullOrEmpty(token))
-                {
-                    url += $"?auth={token}";
-                }
+                url += $"?auth={token}";
             }
-            return url;
         }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error obteniendo el token: " + ex.Message);
+            // Si falla, la URL va sin auth y Firebase dará 401, pero la app no crashea
+        }
+    }
+    return url;
+}
 
         #region Caché Helpers
         private bool TryGetCache<T>(string key, out T? valor)

@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "AdsumPater",
   "resources": {
-    "hash": "sha256-sML8LgoxPDZs5kT/+utNkr8vLSldH7BtKTVqMfCI0F4=",
+    "hash": "sha256-tUb2Q27hPWza/kFloMIAkS3j0fAgS1CHVVyE9TLLkKI=",
     "jsModuleNative": {
       "dotnet.native.8.0.17.gepz9kr21z.js": "sha256-YyxJV6dv935qHoQAmjB+2qRjHeGpm4SyWxE0T/KvsIE="
     },
@@ -17,7 +17,7 @@
       "icudt_no_CJK.dat": "sha256-L7sV7NEYP37/Qr2FPCePo5cJqRgTXRwGHuwF5Q+0Nfs="
     },
     "assembly": {
-      "AdsumPater.wasm": "sha256-fREpBDCzdixLN2Zf7YBjKgFgTTtzUtKsWijhhbwjsyU=",
+      "AdsumPater.wasm": "sha256-5G81XJ0R/V6paVHLDOhl+pFGhpW4KpPfgOL23Kq4IA0=",
       "Microsoft.AspNetCore.Components.wasm": "sha256-3pi3kc0awTSbr4QynmukaNOLhS+UnQaT6a1R8BNEc3M=",
       "Microsoft.AspNetCore.Components.Web.wasm": "sha256-uPzP7grAMYQ4tVahpqhxv6u4AQd17OVc80OAR+7GYfs=",
       "Microsoft.AspNetCore.Components.WebAssembly.wasm": "sha256-78/6ZpnivZVyQnQnudNcNLVnB8NtrZq9U1wQcE4/SLs=",
