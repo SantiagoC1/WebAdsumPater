@@ -6,22 +6,26 @@ namespace AdsumPater.Services
     {
         private readonly HttpClient _http;
         private readonly LocalStorageService _localStorage;
-        private string _baseUrl = "https://adsum-pater-web-default-rtdb.firebaseio.com/";
+        private readonly string _baseUrl;
 
         private static readonly Dictionary<string, (DateTime Expira, object Valor)> _cache = new();
 
         public FirebaseService(HttpClient http, IConfiguration config, LocalStorageService localStorage)
+    {
+        _http = http;
+        _localStorage = localStorage;
+
+        // Priorizamos appsettings.json, si no existe, lanzamos error o usamos un fallback
+        var urlConfig = config["FirebaseUrl"];
+        
+        if (string.IsNullOrWhiteSpace(urlConfig))
         {
-            _http = http;
-            _localStorage = localStorage;
-
-            var urlConfig = config["FirebaseUrl"];
-            if (!string.IsNullOrWhiteSpace(urlConfig))
-                _baseUrl = urlConfig;
-
-            if (!_baseUrl.EndsWith("/"))
-                _baseUrl += "/";
+            // Opcional: Lanzar una excepción para que te des cuenta rápido si falta la config
+            throw new Exception("Falta la configuración 'FirebaseUrl' en appsettings.json");
         }
+
+        _baseUrl = urlConfig.EndsWith("/") ? urlConfig : urlConfig + "/";
+    }
 
         private class CacheLocalItem<T>
         {
@@ -29,16 +33,28 @@ namespace AdsumPater.Services
             public T? Valor { get; set; }
         }
 
-        private string ArmarUrl(string ruta)
+        // --- MODIFICADO: Ahora es async y maneja el token de auth ---
+        private async Task<string> ArmarUrl(string ruta, bool requiereAuth = false)
         {
             ruta = ruta.Trim('/');
-            return $"{_baseUrl}{ruta}.json";
+            var url = $"{_baseUrl}{ruta}.json";
+
+            if (requiereAuth)
+            {
+                // El nombre "firebaseToken" debe coincidir con el que guardas en el JS del index.html
+                var token = await _localStorage.GetItemAsync<string>("firebaseToken");
+                if (!string.IsNullOrEmpty(token))
+                {
+                    url += $"?auth={token}";
+                }
+            }
+            return url;
         }
 
+        #region Caché Helpers
         private bool TryGetCache<T>(string key, out T? valor)
         {
             valor = default;
-
             if (_cache.TryGetValue(key, out var item))
             {
                 if (item.Expira > DateTime.UtcNow && item.Valor is T casteado)
@@ -46,10 +62,8 @@ namespace AdsumPater.Services
                     valor = casteado;
                     return true;
                 }
-
                 _cache.Remove(key);
             }
-
             return false;
         }
 
@@ -63,52 +77,30 @@ namespace AdsumPater.Services
             try
             {
                 var item = await _localStorage.GetItemAsync<CacheLocalItem<T>>(key);
-
-                if (item == null)
-                    return default;
-
+                if (item == null) return default;
                 if (item.Expira <= DateTime.UtcNow)
                 {
                     await _localStorage.RemoveItemAsync(key);
                     return default;
                 }
-
                 return item.Valor;
             }
-            catch
-            {
-                return default;
-            }
+            catch { return default; }
         }
 
         private async Task SetLocalCacheAsync<T>(string key, T valor, int cacheSegundos)
         {
             try
             {
-                var item = new CacheLocalItem<T>
-                {
-                    Expira = DateTime.UtcNow.AddSeconds(cacheSegundos),
-                    Valor = valor
-                };
-
+                var item = new CacheLocalItem<T> { Expira = DateTime.UtcNow.AddSeconds(cacheSegundos), Valor = valor };
                 await _localStorage.SetItemAsync(key, item);
             }
-            catch
-            {
-                // Si falla localStorage, no rompemos la app.
-            }
+            catch { }
         }
 
         private async Task RemoveLocalCacheAsync(string key)
         {
-            try
-            {
-                await _localStorage.RemoveItemAsync(key);
-            }
-            catch
-            {
-                // No hacemos nada si falla.
-            }
+            try { await _localStorage.RemoveItemAsync(key); } catch { }
         }
 
         public async Task LimpiarCache(string? empiezaCon = null)
@@ -118,172 +110,116 @@ namespace AdsumPater.Services
                 _cache.Clear();
                 return;
             }
-
-            var claves = _cache.Keys
-                .Where(k =>
-                    k.StartsWith($"lista:{empiezaCon}", StringComparison.OrdinalIgnoreCase) ||
-                    k.StartsWith($"dic:{empiezaCon}", StringComparison.OrdinalIgnoreCase) ||
-                    k.StartsWith($"obj:{empiezaCon}", StringComparison.OrdinalIgnoreCase))
-                .ToList();
-
-            foreach (var clave in claves)
-                _cache.Remove(clave);
+            var claves = _cache.Keys.Where(k => k.Contains($":{empiezaCon}")).ToList();
+            foreach (var clave in claves) _cache.Remove(clave);
 
             await RemoveLocalCacheAsync($"lista:{empiezaCon}");
             await RemoveLocalCacheAsync($"dic:{empiezaCon}");
             await RemoveLocalCacheAsync($"obj:{empiezaCon}");
         }
+        #endregion
+
+        #region Métodos de Escritura (REQUIEREN AUTH)
 
         public async Task<bool> Agregar<T>(string coleccion, T entidad)
         {
-            var url = ArmarUrl(coleccion);
+            var url = await ArmarUrl(coleccion, requiereAuth: true);
             var response = await _http.PostAsJsonAsync(url, entidad);
-
-            if (response.IsSuccessStatusCode)
-                await LimpiarCache(coleccion);
-
+            if (response.IsSuccessStatusCode) await LimpiarCache(coleccion);
             return response.IsSuccessStatusCode;
         }
-
-        public async Task<List<T>> ObtenerLista<T>(string coleccion, int cacheSegundos = 3600)
-{
-    var cacheKey = $"lista:{coleccion}";
-
-    if (cacheSegundos > 0 && TryGetCache(cacheKey, out List<T>? listaMemoria))
-        return listaMemoria!;
-
-    if (cacheSegundos > 0)
-    {
-        var listaLocal = await GetLocalCacheAsync<List<T>>(cacheKey);
-        if (listaLocal != null)
-        {
-            SetCache(cacheKey, listaLocal, cacheSegundos);
-            return listaLocal;
-        }
-    }
-
-    var url = ArmarUrl(coleccion);
-    var response = await _http.GetFromJsonAsync<Dictionary<string, T>>(url);
-    var lista = response == null ? new List<T>() : response.Values.ToList();
-
-    if (cacheSegundos > 0)
-    {
-        SetCache(cacheKey, lista, cacheSegundos);
-        await SetLocalCacheAsync(cacheKey, lista, cacheSegundos);
-    }
-
-    return lista;
-}
-
-        public async Task<Dictionary<string, T>> ObtenerDiccionario<T>(string coleccion, int cacheSegundos = 3600)
-{
-    var cacheKey = $"dic:{coleccion}";
-
-    if (cacheSegundos > 0 && TryGetCache(cacheKey, out Dictionary<string, T>? dicMemoria))
-        return dicMemoria!;
-
-    if (cacheSegundos > 0)
-    {
-        var dicLocal = await GetLocalCacheAsync<Dictionary<string, T>>(cacheKey);
-        if (dicLocal != null)
-        {
-            SetCache(cacheKey, dicLocal, cacheSegundos);
-            return dicLocal;
-        }
-    }
-
-    var url = ArmarUrl(coleccion);
-    var dic = await _http.GetFromJsonAsync<Dictionary<string, T>>(url) ?? new Dictionary<string, T>();
-
-    if (cacheSegundos > 0)
-    {
-        SetCache(cacheKey, dic, cacheSegundos);
-        await SetLocalCacheAsync(cacheKey, dic, cacheSegundos);
-    }
-
-    return dic;
-}
-
-        public async Task<T?> ObtenerObjeto<T>(string nodo, int cacheSegundos = 3600)
-{
-    var cacheKey = $"obj:{nodo}";
-
-    if (cacheSegundos > 0 && TryGetCache(cacheKey, out T? objMemoria))
-        return objMemoria;
-
-    if (cacheSegundos > 0)
-    {
-        var objLocal = await GetLocalCacheAsync<T>(cacheKey);
-        if (objLocal != null)
-        {
-            SetCache(cacheKey, objLocal, cacheSegundos);
-            return objLocal;
-        }
-    }
-
-    var url = ArmarUrl(nodo);
-    var obj = await _http.GetFromJsonAsync<T>(url);
-
-    if (obj is not null && cacheSegundos > 0)
-    {
-        SetCache(cacheKey, obj, cacheSegundos);
-        await SetLocalCacheAsync(cacheKey, obj, cacheSegundos);
-    }
-
-    return obj;
-}
 
         public async Task<bool> GuardarObjeto<T>(string nodo, T objeto)
         {
-            var url = ArmarUrl(nodo);
+            var url = await ArmarUrl(nodo, requiereAuth: true);
             var response = await _http.PutAsJsonAsync(url, objeto);
-
-            if (response.IsSuccessStatusCode)
-                await LimpiarCache(nodo);
-
-            return response.IsSuccessStatusCode;
-        }
-
-        public async Task<bool> ActualizarCampo(string coleccion, string idFirebase, string campo, object valor)
-        {
-            var url = ArmarUrl($"{coleccion}/{idFirebase}/{campo}");
-            var response = await _http.PutAsJsonAsync(url, valor);
-
-            if (response.IsSuccessStatusCode)
-                await LimpiarCache(coleccion);
-
+            if (response.IsSuccessStatusCode) await LimpiarCache(nodo);
             return response.IsSuccessStatusCode;
         }
 
         public async Task<bool> ActualizarObjeto<T>(string nodo, string key, T objeto)
         {
-            var url = ArmarUrl($"{nodo}/{key}");
+            var url = await ArmarUrl($"{nodo}/{key}", requiereAuth: true);
             var response = await _http.PutAsJsonAsync(url, objeto);
+            if (response.IsSuccessStatusCode) await LimpiarCache(nodo);
+            return response.IsSuccessStatusCode;
+        }
 
-            if (response.IsSuccessStatusCode)
-                await LimpiarCache(nodo);
-
+        public async Task<bool> ActualizarCampo(string coleccion, string idFirebase, string campo, object valor)
+        {
+            var url = await ArmarUrl($"{coleccion}/{idFirebase}/{campo}", requiereAuth: true);
+            var response = await _http.PutAsJsonAsync(url, valor);
+            if (response.IsSuccessStatusCode) await LimpiarCache(coleccion);
             return response.IsSuccessStatusCode;
         }
 
         public async Task<bool> Borrar(string nodo, string id)
         {
-            var url = ArmarUrl($"{nodo}/{id}");
+            var url = await ArmarUrl($"{nodo}/{id}", requiereAuth: true);
             var response = await _http.DeleteAsync(url);
-
-            if (response.IsSuccessStatusCode)
-                await LimpiarCache(nodo);
-
+            if (response.IsSuccessStatusCode) await LimpiarCache(nodo);
             return response.IsSuccessStatusCode;
         }
 
+        #endregion
+
+        #region Métodos de Lectura (PÚBLICOS)
+
+        public async Task<List<T>> ObtenerLista<T>(string coleccion, int cacheSegundos = 3600)
+        {
+            var cacheKey = $"lista:{coleccion}";
+            if (cacheSegundos > 0 && TryGetCache(cacheKey, out List<T>? listaMemoria)) return listaMemoria!;
+
+            var url = await ArmarUrl(coleccion); // requiereAuth es false por defecto
+            var response = await _http.GetFromJsonAsync<Dictionary<string, T>>(url);
+            var lista = response == null ? new List<T>() : response.Values.ToList();
+
+            if (cacheSegundos > 0)
+            {
+                SetCache(cacheKey, lista, cacheSegundos);
+                await SetLocalCacheAsync(cacheKey, lista, cacheSegundos);
+            }
+            return lista;
+        }
+
+        public async Task<Dictionary<string, T>> ObtenerDiccionario<T>(string coleccion, int cacheSegundos = 3600)
+        {
+            var cacheKey = $"dic:{coleccion}";
+            if (cacheSegundos > 0 && TryGetCache(cacheKey, out Dictionary<string, T>? dicMemoria)) return dicMemoria!;
+
+            var url = await ArmarUrl(coleccion);
+            var dic = await _http.GetFromJsonAsync<Dictionary<string, T>>(url) ?? new Dictionary<string, T>();
+
+            if (cacheSegundos > 0)
+            {
+                SetCache(cacheKey, dic, cacheSegundos);
+                await SetLocalCacheAsync(cacheKey, dic, cacheSegundos);
+            }
+            return dic;
+        }
+
+        public async Task<T?> ObtenerObjeto<T>(string nodo, int cacheSegundos = 3600)
+        {
+            var cacheKey = $"obj:{nodo}";
+            if (cacheSegundos > 0 && TryGetCache(cacheKey, out T? objMemoria)) return objMemoria;
+
+            var url = await ArmarUrl(nodo);
+            var obj = await _http.GetFromJsonAsync<T>(url);
+
+            if (obj is not null && cacheSegundos > 0)
+            {
+                SetCache(cacheKey, obj, cacheSegundos);
+                await SetLocalCacheAsync(cacheKey, obj, cacheSegundos);
+            }
+            return obj;
+        }
+
+        #endregion
+
         public bool EsUrlArchivoValida(string? url)
         {
-            if (string.IsNullOrWhiteSpace(url))
-                return false;
-
-            return Uri.TryCreate(url, UriKind.Absolute, out _) ||
-                   url.StartsWith("/", StringComparison.OrdinalIgnoreCase);
+            if (string.IsNullOrWhiteSpace(url)) return false;
+            return Uri.TryCreate(url, UriKind.Absolute, out _) || url.StartsWith("/");
         }
     }
 }

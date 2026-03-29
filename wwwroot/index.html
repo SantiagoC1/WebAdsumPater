@@ -49,28 +49,35 @@
 
     firebase.initializeApp(firebaseConfig);
 
-    window.googleLogin = async () => {
-        const provider = new firebase.auth.GoogleAuthProvider();
+   window.googleLogin = async () => {
+    const provider = new firebase.auth.GoogleAuthProvider();
 
-        try {
-            const result = await firebase.auth().signInWithPopup(provider);
-            const user = result.user;
+    try {
+        const result = await firebase.auth().signInWithPopup(provider);
+        const user = result.user;
 
-            console.log("googleLogin OK", user);
+        // --- OBTENER EL TOKEN DE ID ---
+        const idToken = await user.getIdToken();
 
-            return {
-                email: user?.email || "",
-                displayName: user?.displayName || ""
-            };
-        } catch (error) {
-            console.error("Error Login:", error);
-            throw error;
-        }
-    };
+        console.log("googleLogin OK", user.email);
 
-    window.googleLogout = async () => {
-        await firebase.auth().signOut();
-    };
+        // Guardamos el token en localStorage para que el FirebaseService lo use
+        localStorage.setItem("firebaseToken", idToken);
+
+        return {
+            email: user?.email || "",
+            displayName: user?.displayName || ""
+        };
+    } catch (error) {
+        console.error("Error Login:", error);
+        throw error;
+    }
+};
+
+window.googleLogout = async () => {
+    await firebase.auth().signOut();
+    localStorage.removeItem("firebaseToken"); // Limpiar el token al salir
+};
 </script>
 
     <script src="_framework/blazor.webassembly.js" autostart="false"></script>
